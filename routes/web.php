@@ -17,11 +17,17 @@ Route::get('/', 'PagesController@root')->name('root');
 //用户登录注册
 Auth::routes();
 
-//未验证邮箱的重定向页面
 Route::group(['middleware' => 'auth'], function() {
+    //未验证邮箱的重定向页面
     Route::get('/email_verify_notice', 'PagesController@emailVerifyNotice')->name('email_verify_notice');
-    // 开始
+    //手动发送验证以邮件页面
+    Route::get('/email_verification/send', 'EmailVerificationController@send')->name('email_verification.send');
+    //验证邮箱页面
+    Route::get('/email_verification/verify', 'EmailVerificationController@verify')->name('email_verification.verify');
+
+
     Route::group(['middleware' => 'email_verified'], function() {
+        //这里的路由加入了验证邮箱中间件，必须要验证邮箱才可访问
         Route::get('/test', function() {
             return 'Your email is verified';
         });
