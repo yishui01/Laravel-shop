@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use App\Exceptions\InvalidRequestException;
 
 
 class EmailVerificationController extends Controller
@@ -19,19 +20,19 @@ class EmailVerificationController extends Controller
         $token = $request->input('token');
         //如果有一个为空则抛出异常
         if (empty($email) || empty($token)) {
-            throw new \Exception('验证链接不正确');
+            throw new InvalidRequestException('验证链接不正确');
         }
         //从缓存中获取数据，与传过来的key（emial），value（token）比对
         $perfix = Config::get('myconfig.perfix.verify_email');
         $key = $perfix.$email;
         $value = Cache::get($key);
         if ($value != $token) {
-            throw new \Exception('验证链接不正确');
+            throw new InvalidRequestException('验证链接不正确');
         }
         //在数据表中根据邮箱查找对应的用户
         $user =User::where('email', $email)->first();
         if (!$user) {
-            throw new \Exception('用户不存在');
+            throw new InvalidRequestException('用户不存在');
         }
         $user->email_verified = 1;
         $user->save();
@@ -47,7 +48,7 @@ class EmailVerificationController extends Controller
     {
         $user = Auth::user();
         if ($user->email_verified) {
-            throw new \Exception('您已经验证过邮箱了');
+            throw new InvalidRequestException('您已经验证过邮箱了');
         }
         //调用notify方法来发送已经定义好的通知类
         $user->notify(new EmailVerificationNotification());

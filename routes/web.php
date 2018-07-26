@@ -28,9 +28,7 @@ Route::group(['middleware' => 'auth'], function() {
 
     Route::group(['middleware' => 'email_verified'], function() {
         //这里的路由加入了验证邮箱中间件，必须要验证邮箱才可访问
-        Route::get('/test', function() {
-            return 'Your email is verified';
-        });
+        Route::get('user_addresses', 'UserAddressesController@index')->name('user_addresses.index');
     });
     // 结束
 });
