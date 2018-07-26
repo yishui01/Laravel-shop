@@ -83,7 +83,7 @@ class ProductsController extends Controller
             $grid->rating('评分');
             $grid->sold_count('销量');
             $grid->review_count('评论数');
-            
+
             $grid->tools(function ($tools) {
                 // 禁用批量删除按钮
                 $tools->batch(function ($batch) {
