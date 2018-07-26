@@ -25,7 +25,6 @@
                                     还没有收货地址请添加收货地址哦！
                                 </a>
                             </td>
-
                         @else
                             @foreach($addresses as $address)
                             <tr>
@@ -43,6 +42,7 @@
                                 </td>
                             </tr>
                         @endforeach
+                            @endif
                         </tbody>
                     </table>
                 </div>
