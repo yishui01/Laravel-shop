@@ -39,7 +39,8 @@ class CartController extends Controller
          * 这里的.符号就可以达到多级关联的效果
          */
         $cartItems = Auth::user()->cartItems()->with('productSku.product')->paginate(16);
-        return view('cart.index', ['cartItems'=>$cartItems]);
+        $addresses = Auth::user()->addresses()->orderBy('last_used_at', 'desc')->get();
+        return view('cart.index', ['cartItems' => $cartItems, 'addresses' => $addresses]);
     }
 
     //从购物车中移除商品
