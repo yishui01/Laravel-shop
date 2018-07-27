@@ -12,6 +12,7 @@ use App\Exceptions\SystemException;
 use App\Jobs\CloseOrder;
 class OrdersController extends Controller
 {
+    //下单
     public function store(OrderRequest $request)
     {
         $user  = Auth::user();
@@ -69,4 +70,12 @@ class OrdersController extends Controller
 
         return $order;
     }
+
+    //订单列表页
+    public function index()
+    {
+        $orders = Auth::user()->orders()->with(['items.productSku', 'items.product']) ->orderBy('created_at', 'desc')->paginate();
+        return view('orders.index', ['orders' => $orders]);
+    }
+
 }
