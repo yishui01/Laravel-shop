@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\InvalidRequestException;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductsController extends Controller
 {
@@ -57,6 +58,35 @@ class ProductsController extends Controller
         if (!$product || !$product->on_sale) {
             throw new InvalidRequestException('该商品未上架');
         }
-        return view('products.show', ['product' => $product]);
+        $favorite = false;
+        if ($user = Auth::user()) {
+            //从中间表获取用户收藏的当前商品的记录
+            $favorite = $user->favoriteProducts()->find($product->id);
+        }
+        return view('products.show', ['product' => $product, 'favorite'=>$favorite]);
+    }
+
+    //商品收藏接口
+    public function favor(Product $product, Request $request)
+    {
+        $user = $request->user();
+        if ($user->favoriteProducts()->find($product->id)) {
+            return [];
+        }
+
+        //向中间表添加记录
+        $user->favoriteProducts()->attach($product);
+
+        return [];
+    }
+
+    //取消商品收藏接口
+    public function disfavor(Product $product, Request $request)
+    {
+        $user = $request->user();
+        //删除中间表记录
+        $user->favoriteProducts()->detach($product);
+
+        return [];
     }
 }
