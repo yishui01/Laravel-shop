@@ -89,4 +89,11 @@ class ProductsController extends Controller
 
         return [];
     }
+
+    //收藏商品列表
+    public function favorites()
+    {
+        $products = Auth::user()->favoriteProducts()->paginate(16);
+        return view('products.favorites', ['products'=>$products]);
+    }
 }
