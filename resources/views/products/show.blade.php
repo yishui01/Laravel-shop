@@ -22,8 +22,7 @@
                                 <label>选择</label>
                                 <div class="btn-group" data-toggle="buttons">
                                     @foreach($product->skus as $sku)
-                                        <label
-                                                class="btn btn-default sku-btn"
+                                        <label class="btn btn-default sku-btn"
                                                 data-price="{{ $sku->price }}"
                                                 data-stock="{{ $sku->stock }}"
                                                 data-toggle="tooltip"
