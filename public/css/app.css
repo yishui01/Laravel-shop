@@ -8404,6 +8404,12 @@ body {
   margin-right: 5px;
 }
 
+.products-index-page .search-form {
+  padding: 0 20px 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
 .products-index-page .products-list {
   padding: 0 15px;
 }
