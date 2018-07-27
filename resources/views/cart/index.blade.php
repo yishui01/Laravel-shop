@@ -108,6 +108,21 @@
                         axios.delete('/cart/' + id)
                             .then(function () {
                                 location.reload();
+                            }, function (error) {
+                                if (error.response.status === 422) {
+                                    // http 状态码为 422 代表用户输入校验失败
+                                    var html = '<div>';
+                                    _.each(error.response.data.errors, function (errors) {
+                                        _.each(errors, function (error) {
+                                            html += error+'<br>';
+                                        })
+                                    });
+                                    html += '</div>';
+                                    swal({content: $(html)[0], icon: 'error'})
+                                } else {
+                                    // 其他情况应该是系统挂了
+                                    swal('系统错误', '', 'error');
+                                }
                             })
                  });
             });

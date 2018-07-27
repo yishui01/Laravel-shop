@@ -9,6 +9,7 @@ use App\Models\Order;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Exceptions\SystemException;
+use App\Jobs\CloseOrder;
 class OrdersController extends Controller
 {
     public function store(OrderRequest $request)
@@ -63,6 +64,8 @@ class OrdersController extends Controller
 
             return $order;
         });
+
+        $this->dispatch(new CloseOrder($order, config('myconfig.order.order_ttl')));
 
         return $order;
     }
