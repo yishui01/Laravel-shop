@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Log;
 use App\Exceptions\InvalidRequestException;
 use Endroid\QrCode\QrCode;
 use App\Events\OrderPaid;
+use Carbon\Carbon;
 class PaymentController extends Controller
 {
     public function payByAlipay(Order $order, Request $request)
@@ -104,7 +105,7 @@ class PaymentController extends Controller
             'payment_method' => 'wechat',
             'payment_no'     => $data->transaction_id,
         ]);
-        $this->afterPaid($order);
+        $this->afterPaid($order); //出发一个自定义事件，这个事件绑定了两个listener，一个发邮件一个+销量
         return app('wechat_pay')->success();
     }
 

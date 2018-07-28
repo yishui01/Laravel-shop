@@ -72,7 +72,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
         });
 
         // 这里我们直接使用 dispatch 函数
-        dispatch(new CloseOrder($order, config('app.order_ttl')));
+        dispatch(new CloseOrder($order, config('myconfig.order.order_ttl')));
 
         return $order;
     }

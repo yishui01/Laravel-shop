@@ -32,7 +32,7 @@ class UpdateProductSoldCount
         $order = $event->getOrder();
         // 循环遍历订单的商品
         foreach ($order->items as $item) {
-            $product   = $item->product;
+            $product = $item->product;
             // 计算对应商品的销量
             $soldCount = OrderItem::query()
                 ->where('product_id', $product->id)
@@ -43,5 +43,6 @@ class UpdateProductSoldCount
             $product->update([
                 'sold_count' => $soldCount,
             ]);
+        }
     }
 }
