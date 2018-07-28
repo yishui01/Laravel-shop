@@ -402,6 +402,10 @@ body {
 }
 
 .orders-review-show-page {
+  .payment-buttons, .receive-button, .refund-button {
+    margin-top: 10px;
+    padding-right: 10px;
+  }
   .vertical-middle {
     vertical-align: middle;
   }

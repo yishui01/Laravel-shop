@@ -8863,6 +8863,13 @@ body {
   padding-right: 10px;
 }
 
+.orders-review-show-page .payment-buttons,
+.orders-review-show-page .receive-button,
+.orders-review-show-page .refund-button {
+  margin-top: 10px;
+  padding-right: 10px;
+}
+
 .orders-review-show-page .vertical-middle {
   vertical-align: middle;
 }

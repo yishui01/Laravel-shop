@@ -66,6 +66,8 @@ Route::group(['middleware' => 'auth'], function() {
         Route::get('orders/{order}/review', 'OrdersController@review')->name('orders.review.show');
         //存储评价
         Route::post('orders/{order}/review', 'OrdersController@sendReview')->name('orders.review.store');
+        //申请退款
+        Route::post('orders/{order}/apply_refund', 'OrdersController@applyRefund')->name('orders.apply_refund');
 
     });
     // 结束
