@@ -92,12 +92,17 @@ class OrdersController extends Controller
                 // 禁用删除和编辑按钮
                 $actions->disableDelete();
                 $actions->disableEdit();
+
+                //$actions->append() 方法可以在每一行的 操作 那一栏添加 Html 代码，这里我们添加了一个 查看 按钮。
+                $actions->append('<a class="btn btn-xs btn-primary" href="'.route('admin.orders.show', [$actions->getKey()]).'">查看</a>');
+
             });
             $grid->tools(function ($tools) {
                 // 禁用批量删除按钮
                 $tools->batch(function ($batch) {
                     $batch->disableDelete();
                 });
+
             });
         });
     }
@@ -115,6 +120,15 @@ class OrdersController extends Controller
 
             $form->display('created_at', 'Created At');
             $form->display('updated_at', 'Updated At');
+        });
+    }
+
+    public function show(Order $order)
+    {
+        return Admin::content(function (Content $content) use ($order){
+            $content->header('查看订单');
+            //body方法可以接受laravel的视图作为参数
+            $content->body(view('admin.orders.show', ['order'=>$order]));
         });
     }
 }
