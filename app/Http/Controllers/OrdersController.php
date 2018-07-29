@@ -17,6 +17,8 @@ use App\Exceptions\SystemException;
 use App\Jobs\CloseOrder;
 use App\Services\OrderService;
 use App\Exceptions\InvalidRequestException;
+use App\Exceptions\CouponCodeUnavailableException;
+use App\Models\CouponCode;
 class OrdersController extends Controller
 {
     //下单
@@ -25,7 +27,14 @@ class OrdersController extends Controller
 
         $user    = $request->user();
         $address = UserAddress::find($request->input('address_id'));
-        return $orderService->store($user, $address, $request->input('remark'), $request->input('items'));
+        // 如果用户提交了优惠码
+        if ($code = $request->input('coupon_code')) {
+            $coupon = CouponCode::where('code', $code)->first();
+            if (!$coupon) {
+                throw new CouponCodeUnavailableException('优惠券不存在');
+            }
+        }
+        return $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon);
     }
 
     //订单列表页

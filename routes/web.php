@@ -70,6 +70,8 @@ Route::group(['middleware' => 'auth'], function() {
         Route::post('orders/{order}/apply_refund', 'OrdersController@applyRefund')->name('orders.apply_refund');
         //微信退款通知回调
         Route::post('payment/wechat/refund_notify', 'PaymentController@wechatRefundNotify')->name('payment.wechat.refund_notify');
+        //优惠券查询
+        Route::get('coupon_codes/{code}', 'CouponCodesController@show')->name('coupon_codes.show');
 
     });
     // 结束
