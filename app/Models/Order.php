@@ -82,9 +82,16 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+    //订单sku
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    //优惠券
+    public function couponCode()
+    {
+        return $this->belongsTo(CouponCode::class);
     }
 
     //生成订单流水号
