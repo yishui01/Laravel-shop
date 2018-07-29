@@ -27,6 +27,7 @@ class OrdersController extends Controller
 
         $user    = $request->user();
         $address = UserAddress::find($request->input('address_id'));
+        $coupon = null;
         // 如果用户提交了优惠码
         if ($code = $request->input('coupon_code')) {
             $coupon = CouponCode::where('code', $code)->first();

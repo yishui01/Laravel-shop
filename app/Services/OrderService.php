@@ -29,7 +29,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
         // 如果传入了优惠券，则先检查是否可用
         if ($coupon) {
             // 但此时我们还没有计算出订单总金额，因此先不传订单总金额，不会校验是否达到最小金额
-            $coupon->checkAvailable();
+            $coupon->checkAvailable($user);
         }
 
         // 开启一个数据库事务
@@ -71,7 +71,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
             }
             if ($coupon) {
                 // 总金额已经计算出来了，检查是否符合优惠券规则
-                $coupon->checkAvailable($totalAmount);
+                $coupon->checkAvailable($user, $totalAmount);
                 // 把订单金额修改为优惠后的金额
                 $totalAmount = $coupon->getAdjustedPrice($totalAmount);
                 // 将订单与优惠券关联
