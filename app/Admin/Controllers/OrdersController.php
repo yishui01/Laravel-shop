@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Exceptions\InvalidRequestException;
+use App\Exceptions\SystemException;
 use App\Http\Requests\Request;
 use App\Models\Order;
 use App\Http\Requests\Admin\HandleRefundRequest;
@@ -176,8 +177,7 @@ class OrdersController extends Controller
         }
         // 是否同意退款
         if ($request->input('agree')) {
-            // 同意退款的逻辑这里先留空
-            // todo
+            $this->_refundOrder($order);
         } else {
             // 将拒绝退款理由放到订单的 extra 字段中
             $extra = $order->extra ?: [];
@@ -192,6 +192,46 @@ class OrdersController extends Controller
         return $order;
     }
 
+
+    protected function _refundOrder(Order $order)
+    {
+        //判断订单支付方式
+        switch ($order->payment_method) {
+            case 'wechat':
+                //
+                break;
+            case 'alipay':
+                $refundNo = Order::getAvailableRefundNo();
+                //调用支付宝的refund方法
+            $ret = app('alipay')->refund([
+                'out_trade_no' => $order->no, //之前的订单流水号
+                'refund_amount' => $order->total_amount, //退款金额，单位：元
+                'out_request_no' => $refundNo, //退款订单号
+            ]);
+            //根据支付宝的文档，如果返回值里有sub_code字段说明退款失败
+            if ($ret->sub_code) {
+                //将退款失败的原因保存存入extra字段
+                $extra = $order->extra;
+                $extra['refund_failed_code'] = $ret->sub_code;
+                //将订单的退款状态标记为退款失败
+                $order->update([
+                    'refund_no' => $refundNo,
+                    'refund_status' => Order::REFUND_STATUS_FAILED,
+                    'extra' => $extra,
+                ]);
+            } else {
+                //将订单状态标记为退款成功并记录退款单号
+                $order->update([
+                    'refund_no' => $refundNo,
+                    'refund_status' => Order::REFUND_STATUS_SUCCESS
+                ]);
+            }
+            break;
+            default:
+                throw new SystemException('未知的订单支付方式'.$order->payment_method);
+                break;
+        }
+    }
 
 
 
