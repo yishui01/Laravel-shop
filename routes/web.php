@@ -68,6 +68,8 @@ Route::group(['middleware' => 'auth'], function() {
         Route::post('orders/{order}/review', 'OrdersController@sendReview')->name('orders.review.store');
         //申请退款
         Route::post('orders/{order}/apply_refund', 'OrdersController@applyRefund')->name('orders.apply_refund');
+        //微信退款通知回调
+        Route::post('payment/wechat/refund_notify', 'PaymentController@wechatRefundNotify')->name('payment.wechat.refund_notify');
 
     });
     // 结束

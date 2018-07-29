@@ -198,7 +198,19 @@ class OrdersController extends Controller
         //判断订单支付方式
         switch ($order->payment_method) {
             case 'wechat':
-                //
+                $refundNo = Order::getAvailableRefundNo();
+                app('wechat_pay')->refund([
+                    'out_trade_no' =>$order->no, //之前的流水单号
+                    'total_fee' => $order->total_amount * 100, //原订单金额，单位：分
+                    'refund_fee' => $order->total_amount * 100, //本次要退款的金额，单位：分
+                    'out_refund_no' => $refundNo, //退款单号
+                    'notify_url' =>  route('payment.wechat.refund_notify'), //微信退款通知不是同步返回的，要加一个异步通知的回调地址
+                ]);
+                // 将订单状态改成退款中
+                $order->update([
+                    'refund_no' => $refundNo,
+                    'refund_status' => Order::REFUND_STATUS_PROCESSING,
+                ]);
                 break;
             case 'alipay':
                 $refundNo = Order::getAvailableRefundNo();
