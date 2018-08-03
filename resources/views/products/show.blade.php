@@ -157,7 +157,10 @@
                             });
                             html += '</div>';
                             swal({content: $(html)[0], icon: 'error'})
-                        } else {
+                        } else if (error.response && error.response.data.msg) {
+                            // 其他有 msg 字段的情况，将 msg 提示给用户
+                            swal(error.response.data.msg, '', 'error');
+                        }  else {
 
                             // 其他情况应该是系统挂了
                             swal('系统错误', '', 'error');
