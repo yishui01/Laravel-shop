@@ -51,7 +51,7 @@ class EmailVerificationController extends Controller
             throw new InvalidRequestException('您已经验证过邮箱了');
         }
         //调用notify方法来发送已经定义好的通知类
-        $user->notify(new EmailVerificationNotification());
+        $res = $user->notify(new EmailVerificationNotification());
 
         return view('pages.success', ['msg' => '邮件发送成功']);
     }

@@ -32,3 +32,20 @@ function normalize_xml($obj)
     }
     return $result;
 }
+
+//API请求成功响应
+function success_json($data = [], $header = [])
+{
+    $response = response();
+    if (!empty($header) && is_array($header)) {
+       $response->withHeaders($header);
+    }
+    return $response->json($data);
+}
+
+//API请求错误响应
+function error_json($errcode = '500', $errmsg = '服务器内部错误')
+{
+    $data = ['errcode' => $errcode, 'errmsg'=>$errmsg];
+    return response()->json($data);
+}

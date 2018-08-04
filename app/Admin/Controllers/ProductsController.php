@@ -10,6 +10,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
+use Illuminate\Validation\Rule;
 
 class ProductsController extends Controller
 {
@@ -41,7 +42,7 @@ class ProductsController extends Controller
     {
         return Admin::content(function (Content $content) use ($id) {
 
-            $content->header('header');
+            $content->header('修改商品');
             $content->description('description');
 
             $content->body($this->form()->edit($id));
@@ -72,7 +73,7 @@ class ProductsController extends Controller
     protected function grid()
     {
         return Admin::grid(Product::class, function (Grid $grid) {
-
+            $grid->model()->orderBy('id', 'desc');
             $grid->id('ID')->sortable();
 
             $grid->title('商品名称');
@@ -116,17 +117,18 @@ class ProductsController extends Controller
             // 创建一组单选框
             $form->radio('on_sale', '上架')->options(['1' => '是', '0'=> '否'])->default('0');
 
+            $king = $form;
             // 直接添加一对多的关联模型
-            $form->hasMany('skus', 'SKU 列表', function (Form\NestedForm $form) {
-                $form->text('title', 'SKU 名称')->rules('required');
-                $form->text('description', 'SKU 描述')->rules('required');
-                $form->text('price', '单价')->rules('required|numeric|min:0.01');
-                $form->text('stock', '剩余库存')->rules('required|integer|min:0');
+            $form->hasMany('attributes', '商品属性', function (Form\NestedForm $form) use ($king) {
+                $form->text('name', '属性名称')->placeholder('请输入该商品具有的属性名称，例如:颜色')->rules('required');
+                $form->radio('hasmany', '属性是否可选')->options(['1' => '可选', '0'=> '唯一'])->default('1')->rules('required');
+                $form->text('val', '属性值')->placeholder('当属性为唯一时，填写该项，否则填0')->default('0')->rules('required');
             });
 
-            // 定义事件回调，当模型即将保存时会触发这个回调
+            // 定义事件回调，当模型即将保存时会触发这个回调,找出最低的价格，存到商品表
             $form->saving(function (Form $form) {
-                $form->model()->price = collect($form->input('skus'))->where(Form::REMOVE_FLAG_NAME, 0)->min('price');
+                $form->model()->price = 0;
+                //$form->model()->price = collect($form->input('skus'))->where(Form::REMOVE_FLAG_NAME, 0)->min('price');
             });
         });
     }

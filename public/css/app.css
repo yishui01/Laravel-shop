@@ -8972,3 +8972,21 @@ body {
   border-radius: 0px;
 }
 
+@-webkit-keyframes onshow {
+  0% {
+    opacity: 0.1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.myshow {
+  -webkit-animation: 0.8s onshow linear;
+}
+
