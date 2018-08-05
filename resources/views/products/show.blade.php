@@ -12,26 +12,27 @@
                         </div>
                         <div class="col-sm-7">
                             <div class="title">{{ $product->title }}</div>
-                            <div class="price"><label>价格</label><em>￥</em><span>{{ $product->price }}</span></div>
+                            <div class="price"><label>价格</label><em>￥</em><span id="sku_price">{{ $product->price }}</span></div>
                             <div class="sales_and_reviews">
                                 <div class="sold_count">累计销量 <span class="count">{{ $product->sold_count }}</span></div>
                                 <div class="review_count">累计评价 <span class="count">{{ $product->review_count }}</span></div>
                                 <div class="rating" title="评分 {{ $product->rating }}">评分 <span class="count">{{ str_repeat('★', floor($product->rating)) }}{{ str_repeat('☆', 5 - floor($product->rating)) }}</span></div>
                             </div>
                             <div class="skus">
-                                <label>选择</label>
-                                <div class="btn-group" data-toggle="buttons">
-                                    @foreach($select_attr as $attr)
+                                    @foreach($select_attr as $k=>$attr)
                                        <label>{{$attr['name']}}</label>
                                         @foreach($attr['data'] as $val)
+                                            <span onclick="click_attr(this);" data-group="{{$k}}" class="sku_btn btn btn-default" data-id="{{$val['id']}}">
                                             {{{$val['attr_val']}}}
+                                             </span>
                                             @endforeach
                                         <br />
                                     @endforeach
-                                </div>
-
                             </div>
-                            <div class="cart_amount"><label>数量</label><input type="text" class="form-control input-sm" value="1"><span>件</span><span class="stock"></span></div>
+
+                            <div class="cart_amount">
+                                <label>数量</label>
+                                <input type="text" class="form-control input-sm" value="1"><span>件</span><span class="stock"></span></div>
                             <div class="buttons">
                                     @if($favorite)
                                         <button class="btn btn-danger btn-disfavor">取消收藏</button>
@@ -84,15 +85,63 @@
         </div>
     </div>
 @endsection
+<style>
 
+</style>
 @section('scriptsAfterJs')
     <script>
+        var check_arr = []; //用户选择的SKU
+        var sku_arr = []; //现有的SKU
+        @if(count($select_attr)) //有可选属性就把skuid先置为零，选完属性再变化
+        var skuid = 0;
+        @elseif(isset($skus[0]) && isset($skus[0]['id']))
+        var skuid = {{$skus[0]['id']}};
+        @else
+        var skuid = 0;
+        @endif
+        var count = {{count($select_attr)}};
+        var check_count = 0; //已经
+        @foreach($skus as $sku)
+        sku_arr["{{$sku->attributes}}"] = {price:{{$sku->price}},stock:{{$sku->stock}}, id:{{$sku->id}}};
+        @endforeach
+
+        function click_attr(self) {
+            var group = $(self).data('group');
+            if (!check_arr[group])check_count++;
+            check_arr[group] = $(self).data('id');
+            var id_str = check_arr.join(',');
+            if (id_str[0] == ',') {
+                id_str = id_str.substr(1,id_str.length);
+            }
+
+            if (count == check_count) {
+                if (sku_arr[id_str]) {
+                    $("#sku_price").text(sku_arr[id_str].price);
+                    $('.product-info .stock').text('库存：' + sku_arr[id_str].stock + '件');
+                    skuid = sku_arr[id_str].id;
+                } else {
+                    $("#sku_price").text('暂无库存');
+                    $('.product-info .stock').text('库存：0 件');
+                    skuid = 0;
+                }
+            }
+
+
+            $(".sku_btn[data-group="+group+"]").removeClass("my_check_attr");
+            $(self).addClass('my_check_attr');
+
+        }
+
         $(document).ready(function () {
+
             $('[data-toggle="tooltip"]').tooltip({trigger: 'hover'});
-            $('.sku-btn').click(function () {
+
+            /*$('.sku-btn').click(function () {
+
                 $('.product-info .price span').text($(this).data('price'));
                 $('.product-info .stock').text('库存：' + $(this).data('stock') + '件');
-            });
+            });*/
+
 
         // 监听收藏按钮的点击事件
         $('.btn-favor').click(function () {
@@ -130,11 +179,21 @@
 
             // 加入购物车按钮点击事件
             $('.btn-add-to-cart').click(function () {
-
+                var amount = $('.cart_amount input').val(); //库存
+                if(count != check_arr.length){
+                    swal('请先选择完商品属性', '', 'error');
+                    return false;
+                }else if (skuid == 0) {
+                    swal('当前商品暂无库存', '', 'error');
+                    return false;
+                } else if (amount <= 0) {
+                    swal('购买数不能小于0', '', 'error');
+                    return false;
+                }
                 // 请求加入购物车接口
                 axios.post('{{ route('cart.add') }}', {
-                    sku_id: $('label.active input[name=skus]').val(),
-                    amount: $('.cart_amount input').val(),
+                    sku_id: skuid,
+                    amount: amount,
                 })
                     .then(function () { // 请求成功执行此回调
                         swal('加入购物车成功', '', 'success');

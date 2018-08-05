@@ -26,6 +26,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
     因此关闭订单的任务类改为 dispatch() 辅助函数来触发。*/
     public function store(User $user, UserAddress $address, $remark, $items, CouponCode $coupon = null)
     {
+
         // 如果传入了优惠券，则先检查是否可用
         if ($coupon) {
             // 但此时我们还没有计算出订单总金额，因此先不传订单总金额，不会校验是否达到最小金额
@@ -47,6 +48,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                 'remark'       => $remark,
                 'total_amount' => 0,
             ]);
+
             // 订单关联到当前用户
             $order->user()->associate($user);
             // 写入数据库

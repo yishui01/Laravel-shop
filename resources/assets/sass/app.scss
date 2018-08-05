@@ -495,3 +495,15 @@ body {
 .myshow{
   -webkit-animation: 0.8s onshow linear;
 }
+
+//border: 2px solid red !important;
+.my_check_attr{
+  border:2px solid black !important;
+  background: url(/img/check_attr.png) 100% 100% no-repeat !important;
+}
+.sku_btn{
+  padding:5px;
+  margin:3px;
+  border-radius: 0;
+  border:2px solid #e3e9ec;
+}
