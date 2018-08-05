@@ -21,17 +21,15 @@
                             <div class="skus">
                                 <label>选择</label>
                                 <div class="btn-group" data-toggle="buttons">
-                                    @foreach($product->skus as $sku)
-                                        <label class="btn btn-default sku-btn"
-                                                data-price="{{ $sku->price }}"
-                                                data-stock="{{ $sku->stock }}"
-                                                data-toggle="tooltip"
-                                                title="{{ $sku->description }}"
-                                                data-placement="bottom">
-                                            <input type="radio" name="skus" autocomplete="off" value="{{ $sku->id }}"> {{ $sku->title }}
-                                        </label>
+                                    @foreach($select_attr as $attr)
+                                       <label>{{$attr['name']}}</label>
+                                        @foreach($attr['data'] as $val)
+                                            {{{$val['attr_val']}}}
+                                            @endforeach
+                                        <br />
                                     @endforeach
                                 </div>
+
                             </div>
                             <div class="cart_amount"><label>数量</label><input type="text" class="form-control input-sm" value="1"><span>件</span><span class="stock"></span></div>
                             <div class="buttons">

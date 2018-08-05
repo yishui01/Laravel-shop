@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Exceptions\InvalidRequestException;
 use App\Models\Attribute;
+use App\Models\ProductAttribute;
 use App\Models\ProductSku;
 use Illuminate\Support\Facades\DB;
 
@@ -17,83 +18,76 @@ class ProductSkuRequest extends Request
     public function rules()
     {
         return [
-            'price'=>['required','numeric'],
-            'stock'=>['required','numeric'],
-            'product_id'=>['required','integer'],
+            'price'=>['required','numeric','min:0.1'],
+            'stock'=>['required','numeric','min:0'],
+            'product_id'=>['required','integer','min:1'],
             'attributes'=>['required', function($attribute, $value, $fail) {
+            $product_id = request()->input('product_id');
+            $sku_id = request()->input('id');
                 //验证商品是否存在
-                $product = ProductSku::find($this->input('product_id'));
+                $product = ProductSku::find($product_id);
                 if (!$product) {
                     throw new InvalidRequestException('商品不存在', 400);
                 }
 
-                \DB::transaction(function (){
-                    $sku_arr = json_decode($this->input('attributes'), true);
-                    //把本次输入的SKU属性值添加到属性值表中，已存在的值不用添加
-                    $id_arr = [];
-                    $val_arr = [];
-                    foreach ($sku_arr as $k=>$v) {
-                        $where = [
-                            ['attr_id', '=', $v['id']],
-                            ['product_id', '=', $this->input('product_id')],
-                            ['attr_val', '=', $v['value']]
-                        ];
-                        $attr = Attribute::where($where)->first();
-                        if (!$attr) {
+                //验证本次提交的商品SKU属性值是否重复
+                    $attr_arr = json_decode(request()->input('attributes'), true);
+                    if (empty($attr_arr)) {
+                        //$attr_arr为空则查找是否有空属性的sku
+                        $res = ProductSku::where([
+                            'attributes'=>'',
+                            'product_id'=>$product_id
+                        ])->where('id','<>', $sku_id)->first();
+                        return $fail('该商品SKU已存在');
+                    } else {
+                        //查找本次提交的属性值是否有新属性值，有的话必然是新SKU
+                        $isnew = false;
+                        $id_arr = []; //属性值的id
+                        foreach ($attr_arr as $k=>$v) {
 
-                            $obj = Attribute::create([
-                                'attr_id'=>$v['id'],
-                                'attr_val'=>$v['value'],
-                                'product_id'=>$this->input('product_id')
-                            ]);
-                            $id_arr[]=$obj->id;
-                            $val_arr[] = $obj->attr_val;
-                        } else {
-                            $id_arr[] = $attr->id;
-                            $val_arr[] = $attr->attr_val;
-                        }
-                    }
-                    //验证本次添加的SKU属性组合是否重复
-                    $sku_id = request()->input('id');
-                    if($sku_id) {
-                        /*****如果是更新的话先删除本字段的sku值，因为更新的时候要重新刷新该字段的*******/
-                        ProductSku::where('id', $sku_id)->update([
-                            'attributes'=>''
-                        ]);
-                    }
-                    //取出现有商品的SKU列表
-                    $now_sku = ProductSku::select(DB::raw('attributes'))->where('product_id', $this->input('product_id'))->get()->toArray();
-                    $flag = true;
-
-                    if (!empty($now_sku)) {
-                        foreach ($now_sku as $k=>$v) {
-                            $tmp = explode(',', $v['attributes']);
-                            if (!array_diff($tmp, $id_arr)) {
-                                $flag = false;
+                            $where = [
+                                ['attr_id', '=', $v['id']],
+                                ['product_id', '=', $product_id],
+                                ['attr_val', '=', $v['value']]
+                            ];
+                            $sku = Attribute::where($where)->first();
+                            if (!$sku) {
+                                $isnew = true;
                                 break;
+                            } else {
+                                $id_arr[] = $sku->id;
                             }
                         }
-                    }
-                    if(!$flag){
-                        throw new InvalidRequestException('该商品SKU已经存在！');
-                    }
-                    if($sku_id) {
-                        //更新
-                        $sku_obj = ProductSku::find($sku_id);
-                        $sku_obj->fill(request()->all());
-                        $sku_obj->attributes = implode(',', $id_arr);
-                        $sku_obj->title = implode(',',$val_arr); //冗余字段
-                        $sku_obj->save();
-                    } else {
-                        //创建
-                        $sku_obj = new ProductSku();
-                        $sku_obj->fill(request()->all());
-                        $sku_obj->attributes = implode(',', $id_arr);
-                        $sku_obj->title = implode(',',$val_arr); //冗余字段
-                        $sku_obj->save();
-                    }
+                        if ($isnew) {
+                            return;
+                        }
+                        //如果属性值全部是已有的，再看看组合的sku是否重复
+                        //取出现有商品的SKU列表
+                        $product_attr = ProductSku::select(DB::raw('attributes'))
+                            ->where([
+                            ['product_id', '=', $product_id],
+                            ['id', '<>', $sku_id]
+                        ])->get()->toArray();
+                        $flag = true;
 
-                });
+                        if (!empty($product_attr)) {
+                            foreach ($product_attr as $attr) {
+                                if (!empty($attr['attributes'])) {
+                                    $tmp = explode(',', $attr['attributes']);
+                                    if (empty(array_diff($tmp, $id_arr)) && empty(array_diff($id_arr, $tmp))) {
+                                        //发现相同的数组则跳出，返回重复SKU失败提示
+                                        $flag = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                            if (!$flag) {
+                                return $fail('商品属性值已经存在，请勿重复添加');
+                            }
+                        }
+                        return;
+                    }
 
             }]
         ];

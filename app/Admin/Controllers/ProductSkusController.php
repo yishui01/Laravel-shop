@@ -6,6 +6,7 @@ use App\Exceptions\InvalidRequestException;
 use App\Exceptions\SystemException;
 use App\Http\Requests\ProductSkuRequest;
 use App\Http\Requests\Request;
+use App\Models\Attribute;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductSku;
@@ -21,8 +22,6 @@ use Illuminate\Support\Facades\Route;
 
 class ProductSkusController extends Controller
 {
-    use ModelForm;
-
     /**
      * Index interface.
      *
@@ -61,6 +60,7 @@ class ProductSkusController extends Controller
                 ->whereIn('a.id',$attr_id)
                 ->get();
         }
+
 
         return Admin::content(function (Content $content) use ($sku, $attributes) {
             $content->header('修改库存');
@@ -155,12 +155,69 @@ class ProductSkusController extends Controller
 
     public function store(ProductSkuRequest $request)
     {
+        //创建
+        $this->skuSave();
         return [];
     }
 
     public function update(ProductSkuRequest $request)
     {
+        //更新
+        $this->skuSave();
         return [];
+    }
+
+    public function destroy($id)
+    {
+        if ($this->form()->destroy($id)) {
+            return response()->json([
+                'status'  => true,
+                'message' => trans('admin.delete_succeeded'),
+            ]);
+        } else {
+            return response()->json([
+                'status'  => false,
+                'message' => trans('admin.delete_failed'),
+            ]);
+        }
+    }
+
+    public function skuSave()
+    {
+        DB::transaction(function (){
+            if ( !($sku_obj = ProductSku::find(request()->input('id')))) {
+                $sku_obj = new ProductSku();
+            }
+            $sku_obj->fill(request()->all());
+            $attr_arr = json_decode(request()->input('attributes'), true);
+            $id_arr = [];
+            $val_arr = [];
+            if (!empty($attr_arr)) {
+                //先向属性值表中添加属性，在把生成的ID拼成字符串添加到表中
+                foreach ($attr_arr as $v) {
+                    //看属性是否存在，有的话就不用添加了
+                    $obj = Attribute::where([
+                        ['product_id','=', request()->input('product_id')],
+                        ['attr_id', '=', $v['id']],
+                        ['attr_val', '=', $v['value']]
+                    ])->first();
+                    if (!$obj) {
+                        $obj = Attribute::create([
+                            'product_id'=>request()->input('product_id'),
+                            'attr_id'=>$v['id'],
+                            'attr_val'=>$v['value']
+                        ]);
+                    }
+
+                    $id_arr[] = $obj->id;
+                    $val_arr[] = $obj->attr_val;
+
+                }
+            }
+            $sku_obj->attributes = implode(',',$id_arr);
+            $sku_obj->title = implode(',',$val_arr); //冗余字段
+            $sku_obj->save();
+        });
     }
 
 }

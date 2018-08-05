@@ -119,7 +119,7 @@ class ProductsController extends Controller
 
             $king = $form;
             // 直接添加一对多的关联模型
-            $form->hasMany('attributes', '商品属性', function (Form\NestedForm $form) use ($king) {
+            $form->hasMany('pro_attr', '商品属性', function (Form\NestedForm $form) use ($king) {
                 $form->text('name', '属性名称')->placeholder('请输入该商品具有的属性名称，例如:颜色')->rules('required');
                 $form->radio('hasmany', '属性是否可选')->options(['1' => '可选', '0'=> '唯一'])->default('1')->rules('required');
                 $form->text('val', '属性值')->placeholder('当属性为唯一时，填写该项，否则填0')->default('0')->rules('required');

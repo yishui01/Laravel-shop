@@ -21,10 +21,16 @@ class Product extends Model
         return $this->hasMany(ProductSku::class);
     }
 
-    //增加与商品属性表的关联
-    public function attributes()
+    //与商品属性表关联
+    public function pro_attr()
     {
         return $this->hasMany(ProductAttribute::class);
+    }
+
+    //与商品值表关联
+    public function attr()
+    {
+        return $this->hasMany(Attribute::class);
     }
 
     public function getFullImageAttribute()
