@@ -8,7 +8,7 @@ class Product extends Model
 {
     protected $fillable = [
         'title', 'description', 'image', 'on_sale',
-        'rating', 'sold_count', 'review_count', 'price'
+        'rating', 'sold_count', 'review_count', 'price','category_id'
     ];
 
     protected $casts = [
@@ -31,6 +31,12 @@ class Product extends Model
     public function attr()
     {
         return $this->hasMany(Attribute::class);
+    }
+
+    //与分类表的关联
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 
     public function getFullImageAttribute()

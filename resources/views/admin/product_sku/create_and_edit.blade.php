@@ -4,19 +4,19 @@
 
         <div class="box-tools">
             <div class="btn-group pull-right" style="margin-right: 10px">
-                <a href="http://shop.com/admin/skus" class="btn btn-sm btn-default"><i class="fa fa-list"></i>&nbsp;列表</a>
+                <a href="{{route('skus.index')}}" class="btn btn-sm btn-default"><i class="fa fa-list"></i>&nbsp;列表</a>
             </div> <div class="btn-group pull-right" style="margin-right: 10px">
-                <a class="btn btn-sm btn-default form-history-back"><i class="fa fa-arrow-left"></i>&nbsp;返回</a>
+                <a href="{{route('skus.index')}}" class="btn btn-sm btn-default form-history-back"><i class="fa fa-arrow-left"></i>&nbsp;返回</a>
             </div>
         </div>
     </div>
     <!-- /.box-header -->
     <!-- form start -->
         @if($sku->id)
-            <form id="sku_form" method="put" action="{{route('admin.skus.update', $sku->id)}}" class="form-horizontal">
+            <form id="sku_form" method="put" action="{{route('skus.update', $sku->id)}}" class="form-horizontal">
             <input type="hidden" name="id" value="{{$sku->id}}">
         @else
-            <form id="sku_form" method="post" action="{{route('admin.skus.store')}}" class="form-horizontal">
+            <form id="sku_form" method="post" action="{{route('skus.store')}}" class="form-horizontal">
         @endif
             {{csrf_field()}}
         <div class="box-body">
