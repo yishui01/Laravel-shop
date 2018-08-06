@@ -103,7 +103,7 @@ class CategoriesController extends Controller
     protected function form($id = 0)
     {
         $category = new Category();
-        $options_data = $category->getTreeCateList();
+        $options_data = $category->getCateList();
         $options = [];
         foreach ($options_data as $k => $v) {
             if($v['id'] == $id)continue;

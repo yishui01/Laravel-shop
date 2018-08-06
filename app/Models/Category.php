@@ -14,14 +14,14 @@ class Category extends Model
     }
 
     /**获取所有的分类列表
-     * @param bool $isTree 是否返回树形结构
+     * @param bool $islevel 是否返回层级标志
      * @param bool $showTop 是否在结果中加入顶级分类
      * @return array
      */
-    public function getTreeCateList($isTree = false, $showTop = true)
+    public function getCateList($islevel = false, $showTop = true)
     {
-        if ($isTree) {
-           $res = $this->tansfromToTree(Category::select(DB::raw('id,name as text,parent_id'))->get());
+        if ($islevel) {
+           $res = $this->addLevel(Category::select(DB::raw('id,name as text,parent_id'))->get()->toArray());
             $arr = ['id'=>0, 'text'=>'顶级分类', 'parent_id'=>0];
         } else {
             $res = Category::select(DB::raw('id,name as text'))->get()->toArray();
@@ -33,22 +33,14 @@ class Category extends Model
     }
 
     //将分类数据按照parent_id转换成树形结构
-    public function tansfromToTree($data = [])
+    public function addLevel($data = [])
     {
         if (empty($data)) return $data;
-        $res = $this->_tansfromToTree($data, 0, 0, true);
+        $res = $this->_addLevel($data, 0, 0, true);
         return $res;
     }
 
-    /**
-     * 递归遍历数组，返回树形结构数组
-     * @param array $data
-     * @param int $parent_id
-     * @param int $level
-     * @param bool $refresh 是否刷新静态数组（同一次请求内的多次调用需要刷新，否则之前的结果还在里面）
-     * @return array
-     */
-    private function _tansfromToTree($data = [], $parent_id = 0, $level = 0, $refresh = false)
+    private function _addLevel($data = [], $parent_id = 0, $level = 0, $refresh = false)
     {
         if (empty($data)) return $data;
 
@@ -61,16 +53,51 @@ class Category extends Model
         foreach ($data as $k => &$v) {
             if ($v['parent_id'] == $parent_id) {
                 $v['level'] = $level;
-                $v['children'] = $this->_tansfromToTree($data, $v['id'], $level+1, false);
                 $res[] = $v;
+                $this->_addLevel($data, $v['id'], $level+1);
             }
+
         }
 
         return $res;
+    }
+
+    /**
+     * 获取该分类下的所有子分类数据，返回树形结构
+     * @param int $parentid
+     * @param int $obj
+     * @return array
+     */
+    public function getTree($parentid = 0)
+    {
+        $data = Category::all()->toArray();
+        $a = 0;
+        return $this->_getTree($data,$parentid, $a, true);
 
     }
 
-    /**获取分类下的所有子分类
+    public function _getTree($data, $parentid, &$obj = 0, $refresh = false)
+    {
+        static $res = [];
+        foreach ($data as $k=>&$v)
+        {
+            if ($v['parent_id'] == $parentid) {
+                if($obj === 0) {
+                    $this->_getTree($data, $v['id'], $v);
+                    $res[] = $v;
+                } else {
+                    $this->_getTree($data, $v['id'], $v);
+                    $obj['children'][] = $v;
+                }
+
+            }
+        }
+        return $res;
+    }
+
+
+
+    /**返回该分类下的所有子分类ID数组
      * @param int $id 分类ID
      */
     public function getChildren($id = 0)

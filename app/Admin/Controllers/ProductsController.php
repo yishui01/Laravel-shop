@@ -116,7 +116,7 @@ class ProductsController extends Controller
     protected function form($id = 0)
     {
         $category = new Category();
-        $options_data = $category->getTreeCateList(0,0);
+        $options_data = $category->getCateList(0,0);
         $options = [];
         foreach ($options_data as $k => $v) {
             $options[$v['id']] = $v['text'];
