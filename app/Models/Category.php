@@ -32,7 +32,7 @@ class Category extends Model
         return $res;
     }
 
-    //将分类数据按照parent_id转换成树形结构
+    //将分类数据按照parent_id添加层级标志
     public function addLevel($data = [])
     {
         if (empty($data)) return $data;
@@ -76,7 +76,7 @@ class Category extends Model
 
     }
 
-    public function _getTree($data, $parentid, &$obj = 0, $refresh = false)
+    private function _getTree($data, $parentid, &$obj = 0, $refresh = false)
     {
         static $res = [];
         foreach ($data as $k=>&$v)
