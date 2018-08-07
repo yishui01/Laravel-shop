@@ -42,8 +42,8 @@ return [
         ],
 
         'api' => [
-            'driver' => 'token',
-            'provider' => 'users',
+            'driver' => 'jwt',
+            'provider' => 'social_infos',
         ],
     ],
 
@@ -69,6 +69,12 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
+
+        'social_infos' => [
+            'driver' => 'database',
+            'table' => 'social_infos',
+        ]
+
 
         // 'users' => [
         //     'driver' => 'database',

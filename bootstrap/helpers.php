@@ -33,6 +33,37 @@ function normalize_xml($obj)
     return $result;
 }
 
+//解析小程序的userinfo
+function resolveMiniUserInfo($session_key, $encryptedData, $iv)
+{
+    $appid = env('WECHAT_MINI_PROGRAM_APPID');
+    if (strlen($session_key) != 24) {
+        throw new Exception('session_key 长度不对');
+    }
+    $aesKey=base64_decode($session_key);
+
+    if (strlen($iv) != 24) {
+        throw new Exception('iv 长度不对');
+    }
+    $aesIV=base64_decode($iv);
+
+    $aesCipher=base64_decode($encryptedData);
+
+    $result=openssl_decrypt( $aesCipher, "AES-128-CBC", $aesKey, 1, $aesIV);
+
+    $dataObj=json_decode( $result );
+    if( $dataObj  == NULL )
+    {
+        throw new Exception('解密失败，数据为空');
+    }
+    if( $dataObj->watermark->appid != $appid )
+    {
+        throw new Exception('解密失败，appid不对');
+    }
+    return $result;
+}
+
+
 //API请求成功响应
 function success_json($data = [], $header = [])
 {
