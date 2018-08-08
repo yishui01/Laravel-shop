@@ -16,7 +16,7 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version('v1', [
     'namespace' => 'App\Http\Controllers\Api\V1',
-    //'middleware' => ['serializer:array','bindings', 'change-locale'], //这个中间件可以将DataArraySerializer转换成ArraySerializer，少一层嵌套结构包裹
+    'middleware' => ['bindings'], //bindings中间件是为了隐式注入模型
 ], function ($api) {
     $api->group([
         'middleware' => 'api.throttle',
@@ -30,6 +30,18 @@ $api->version('v1', [
         //验证小程序token是否有效
         $api->post('mini/checkToken', 'AuthorizationsController@miniCheckToken')
             ->name('api.mini.authorizations.checkToken');
+        //轮播图列表接口
+        $api->get('mini/banners', 'BannersController@index')
+            ->name('api.mini.banners.index');
+        //分类列表接口
+        $api->get('mini/categories', 'CategoriesController@index')
+            ->name('api.mini.categories.index');
+        //商品列表
+        $api->get('mini/products', 'ProductsController@index')
+            ->name('api.mini.products.index');
+        //商品详情
+        $api->get('mini/products/{product}', 'ProductsController@show')
+            ->name('api.mini.products.index');
     });
 
 

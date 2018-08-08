@@ -122,4 +122,10 @@ class Category extends Model
         return $res;
     }
 
+    public function scopeShow($query)
+    {
+        return $query->where('isshow', '=', 'A');
+    }
+
+
 }

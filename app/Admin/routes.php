@@ -38,4 +38,5 @@ Route::group([
     //商品分类API
     $router->get('api/categories', 'CategoriesController@getTreeCateList')->name('admin.api.categories');
 
+    $router->resource('banners', 'BannersController');
 });
