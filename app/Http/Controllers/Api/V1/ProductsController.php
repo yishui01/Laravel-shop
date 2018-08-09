@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Product;
+use App\Models\ProductSku;
 use App\Transformers\ProductTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +14,9 @@ class ProductsController extends Controller
     public function index(Request $request)
     {
         $product = new Product();
-        $query = $product->query();
+        $query = $product->query()->has('skus', '>=', 1);
 
+        $query->where('on_sale',1);
         if ($categoryId = $request->category_id) {
             $query->where('category_id', $categoryId);
         }
@@ -23,7 +25,8 @@ class ProductsController extends Controller
             $query->where('title', 'like','%'.$request->title.'%');
         }
 
-        $products = $query->paginate(20);
+        $products = $query->paginate(200);
+
         return $this->response->paginator($products, new ProductTransformer());
     }
 
@@ -34,6 +37,9 @@ class ProductsController extends Controller
         if (!$product || !$product->on_sale) {
             throw new InvalidRequestException('该商品未上架');
         }
+
+        //处理商品的图片路径，api隐式注入的模型不会触发获取器
+        $product->image = strpos($product->image, 'http') === false ? env('APP_URL').'/uploads/'.$product->image : $product->image;
 
         $sku_data = $product->getSkuDetail(); //sku以及属性数据
 
@@ -51,6 +57,12 @@ class ProductsController extends Controller
             'product'=>$product
         ];
         return $this->response->array($data)->setStatusCode(201);
+    }
+
+    //商品SKU接口
+    public function sku(ProductSku $productSku)
+    {
+        return response($productSku->load('product'), 201);
     }
 
 

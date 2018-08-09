@@ -42,6 +42,15 @@ $api->version('v1', [
         //商品详情
         $api->get('mini/products/{product}', 'ProductsController@show')
             ->name('api.mini.products.index');
+        //商品SKU详情
+        $api->get('mini/skus/{product_sku}', 'ProductsController@sku')
+            ->name('api.mini.products.sku');
+
+        $api->group(['middleware'=>'api.auth'], function ($api) {
+            //获取登录用户的地址
+            $api->get('mini/user_address', 'UserAddressesController@index')
+                ->name('api.user_address.index');
+        });
     });
 
 

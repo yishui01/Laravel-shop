@@ -15,7 +15,7 @@ class ProductsController extends Controller
     public function index(Request $request)
     {
         // 创建一个查询构造器
-        $builder = Product::query()->where('on_sale', true);
+        $builder = Product::query()->has('skus', '>=', 1)->where('on_sale', true);
         // 判断是否有提交 search 参数，如果有就赋值给 $search 变量
         // search 参数用来模糊搜索商品
         if ($search = $request->input('search', '')) {

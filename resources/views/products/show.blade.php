@@ -102,7 +102,7 @@
         var count = {{count($select_attr)}};
         var check_count = 0; //已经
         @foreach($skus as $sku)
-        sku_arr["{{$sku->attributes}}"] = {price:{{$sku->price}},stock:{{$sku->stock}}, id:{{$sku->id}}};
+        sku_arr.push({'key':"{{$sku->attributes}}", 'val':{price:{{$sku->price}},stock:{{$sku->stock}}, id:{{$sku->id}}} });
         @endforeach
 
         function click_attr(self) {
@@ -115,10 +115,19 @@
             }
 
             if (count == check_count) {
-                if (sku_arr[id_str]) {
-                    $("#sku_price").text(sku_arr[id_str].price);
-                    $('.product-info .stock').text('库存：' + sku_arr[id_str].stock + '件');
-                    skuid = sku_arr[id_str].id;
+                var isfind = false;
+                var key = '';
+                for(var i = 0; i < sku_arr.length; i++) {
+                    if (sku_arr[i].key.split(',').sort().join(',') == id_str.split(',').sort().join(',')) {
+                        isfind = true;
+                        key = i;
+                        break;
+                    }
+                }
+                if (isfind) {
+                    $("#sku_price").text(sku_arr[key].val.price);
+                    $('.product-info .stock').text('库存：' + sku_arr[key].val.stock + '件');
+                    skuid = sku_arr[key].val.id;
                 } else {
                     $("#sku_price").text('暂无库存');
                     $('.product-info .stock').text('库存：0 件');

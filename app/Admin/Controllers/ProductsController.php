@@ -10,6 +10,7 @@ use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Validation\Rule;
 use App\Models\Category;
 
@@ -142,16 +143,16 @@ class ProductsController extends Controller
             $form->hasMany('pro_attr', '商品属性', function (Form\NestedForm $form) use ($king) {
                 $form->text('name', '属性名称')->placeholder('请输入该商品具有的属性名称，例如:颜色')->rules('required');
                 $form->radio('hasmany', '属性是否可选')->options(['1' => '可选', '0'=> '唯一'])->default('1')->rules('required');
-                $form->text('val', '属性值')->placeholder('当属性为唯一时，填写该项，否则填0')->default('0')->rules('required');
+                $form->text('val', '属性值')->placeholder('当属性为可选时（多个属性值），用逗号分隔')->rules('required');
             });
-
-
-
             // 定义事件回调，当模型即将保存时会触发这个回调,找出最低的价格，存到商品表
             $form->saving(function (Form $form) {
                 $form->model()->price = 0;
                 //$form->model()->price = collect($form->input('skus'))->where(Form::REMOVE_FLAG_NAME, 0)->min('price');
             });
+
         });
     }
+
+
 }
