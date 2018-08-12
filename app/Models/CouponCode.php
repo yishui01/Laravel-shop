@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Exceptions\CouponCodeUnavailableException;
+use Illuminate\Support\Carbon;
 class CouponCode extends Model
 {
     // 用常量的方式定义支持的优惠券类型
@@ -61,7 +62,7 @@ class CouponCode extends Model
     }
 
     //检查优惠卷的有效性
-    public function checkAvailable(User $user, $orderAmount = null)
+    public function checkAvailable(User $user, $orderAmount = null, $request_type = 'users')
     {
         if (!$this->enabled) {
             throw new CouponCodeUnavailableException('优惠券不存在');
@@ -85,6 +86,7 @@ class CouponCode extends Model
 
         $used = Order::where('user_id', $user->id)
             ->where('coupon_code_id', $this->id)
+            ->where('user_type', $request_type)
             ->where(function ($query){
                 $query->where(function ($query){
                     $query->whereNull('paid_at')

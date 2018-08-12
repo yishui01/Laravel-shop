@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\CouponCode;
+use App\Models\SocialInfo;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Order;
@@ -11,7 +12,7 @@ use App\Exceptions\InvalidRequestException;
 use App\Jobs\CloseOrder;
 use Carbon\Carbon;
 use App\Exceptions\CouponCodeUnavailableException;
-
+use Illuminate\Support\Facades\Auth;
 class OrderService
 {
     /*$user、$address 变量改为从参数获取。我们在封装功能的时候有一点一定要注意，
@@ -24,17 +25,16 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
     而使用 app() 或者自动解析注入等方式 Laravel 则会自动帮我们处理掉这些依赖。
 之前在控制器中可以通过 $this->dispatch() 方法来触发任务类，但在我们的封装的类中并没有这个方法，
     因此关闭订单的任务类改为 dispatch() 辅助函数来触发。*/
-    public function store(User $user, UserAddress $address, $remark, $items, CouponCode $coupon = null)
+    public function store($user, UserAddress $address, $remark, $items, CouponCode $coupon = null, $request_type = 'users')
     {
-
         // 如果传入了优惠券，则先检查是否可用
         if ($coupon) {
             // 但此时我们还没有计算出订单总金额，因此先不传订单总金额，不会校验是否达到最小金额
-            $coupon->checkAvailable($user);
+            $coupon->checkAvailable($user, null, $request_type);
         }
 
         // 开启一个数据库事务
-        $order = \DB::transaction(function () use ($user, $address, $remark, $items, $coupon) {
+        $order = \DB::transaction(function () use ($user, $address, $remark, $items, $coupon, $request_type) {
             // 更新此地址的最后使用时间
             $address->update(['last_used_at' => Carbon::now()]);
             // 创建一个订单
@@ -49,8 +49,8 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                 'total_amount' => 0,
             ]);
 
-            // 订单关联到当前用户
-            $order->user()->associate($user);
+            $order->user_id = $user->id;
+            $order->user_type = $request_type;
             // 写入数据库
             $order->save();
 
@@ -86,9 +86,11 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
             // 更新订单总金额
             $order->update(['total_amount' => $totalAmount]);
 
-            // 将下单的商品从购物车中移除
-            $skuIds = collect($items)->pluck('sku_id')->all();
-            app(CartService::class)->remove($skuIds);
+            if ($request_type == 'users') {
+                // 将下单的商品从购物车中移除
+                $skuIds = collect($items)->pluck('sku_id')->all();
+                app(CartService::class)->remove($skuIds);
+            }
 
             return $order;
         });
@@ -96,6 +98,43 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
         // 这里我们直接使用 dispatch 函数
         dispatch(new CloseOrder($order, config('myconfig.order.order_ttl')));
 
-        return $order;
+        return response('下单成功','201');
+    }
+
+    /**
+     * 获取该用户的所有订单
+     * @param SocialInfo $socialInfo
+     * @param bool $only_orderId 是否只返回所有订单的ID
+     */
+    public function getAllOrders(SocialInfo $social_user, $only_orderId = false)
+    {
+        $builder = Order::query();
+        if ($social_user->user_id) {
+            //如果绑定了PC端的账号,把所有的订单全部查出来返回
+
+            $all_user = SocialInfo::where('user_id', $social_user->user_id)->pluck('type', 'id');
+
+            foreach ($all_user as $id => $user_type) {
+                $builder->orWhere(function ($query) use ($id, $user_type) {
+                    $query->where([
+                        ['user_id', '=', $id],
+                        ['user_type', '=', $user_type]
+                    ]);
+                });
+            }
+            $builder->orWhere([
+                ['user_id', '=', $social_user->user_id],
+                ['user_type', '=', 'users']
+            ]);
+        } else {
+            $builder->orWhere([
+                ['user_id', '=', $social_user->id],
+                ['user_type', '=', $social_user->user_type]
+            ]);
+        }
+        if ($only_orderId) {
+            return $builder->orderBy('created_at', 'desc')->pluck('id');
+        }
+        return $builder->with(['items.productSku', 'items.product']) ->orderBy('created_at', 'desc')->get();
     }
 }

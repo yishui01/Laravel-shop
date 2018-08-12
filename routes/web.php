@@ -54,10 +54,8 @@ Route::group(['middleware' => 'auth'], function() {
         Route::get('orders/index', 'OrdersController@index')->name('orders.index');
         //订单详情页面
         Route::get('orders/{order}', 'OrdersController@show')->name('orders.show');
-        //支付宝web端扫码支付
+        //支付宝扫码支付
         Route::get('payment/{order}/alipay', 'PaymentController@payByAlipay')->name('payment.alipay');
-        //支付宝扫码支付前端回调函数
-        Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
         //微信扫码支付
         Route::get('payment/{order}/wechat', 'PaymentController@payByWechat')->name('payment.wechat');
         //用户确认收货
@@ -77,8 +75,10 @@ Route::group(['middleware' => 'auth'], function() {
     // 结束
 });
 
-//支付宝扫码回调
+//支付宝扫码服务端回调
 Route::post('payment/alipay/notify', 'PaymentController@alipayNotify')->name('payment.alipay.notify');
+//支付宝扫码支付前端回调函数
+Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
 //微信扫码支付回调
 Route::post('payment/wechat/notify', 'PaymentController@wechatNotify')->name('payment.wechat.notify');
 

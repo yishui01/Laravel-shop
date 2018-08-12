@@ -19,7 +19,7 @@ $api->version('v1', [
     'middleware' => ['bindings'], //bindings中间件是为了隐式注入模型
 ], function ($api) {
     $api->group([
-        'middleware' => 'api.throttle',
+        'middleware' => ['social','api.throttle']
     ], function ($api) {
         // 小程序登录
         $api->post('mini/authorizations', 'AuthorizationsController@miniProgramLogin')
@@ -46,10 +46,19 @@ $api->version('v1', [
         $api->get('mini/skus/{product_sku}', 'ProductsController@sku')
             ->name('api.mini.products.sku');
 
-        $api->group(['middleware'=>'api.auth'], function ($api) {
+        $api->group(['middleware'=>['api.auth']], function ($api) {
             //获取登录用户的地址
             $api->get('mini/user_address', 'UserAddressesController@index')
                 ->name('api.user_address.index');
+            //下单
+            $api->post('mini/orders', 'OrdersController@store')
+                ->name('api.orders.store');
+            //获取用户的订单信息
+            $api->get('mini/orders', 'OrdersController@index')
+                ->name('api.orders.index');
+            //小程序微信支付 //微信支付回调通知url以及退款都在web.php中定义，与web端共用一套路由
+            $api->get('mini/payment/wechat/{order}', 'PaymentController@miniPayByWechat')
+                ->name('api.payement.wechat');
         });
     });
 

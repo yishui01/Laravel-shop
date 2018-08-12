@@ -109,7 +109,7 @@ class PaymentController extends Controller
         return app('wechat_pay')->success();
     }
 
-    //触发下单事件，以此调用该事件的监听者
+    //触发下单支付事件，以此调用该事件的监听者
     protected function afterPaid(Order $order)
     {
         event(new OrderPaid($order));
