@@ -15,7 +15,7 @@ class PaymentController extends Controller
     public function miniPayByWechat(Order $order, Request $request)
     {
         //验证这个订单是不是这个用户的订单
-        $this->authorize('miniOwn', $order);
+        $this->authorize('own', $order);
         // 订单已支付或者已关闭
         if ($order->paid_at || $order->closed) {
             throw new InvalidRequestException('订单状态不正确');

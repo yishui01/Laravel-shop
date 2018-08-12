@@ -108,30 +108,8 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
      */
     public function getAllOrders(SocialInfo $social_user, $only_orderId = false)
     {
-        $builder = Order::query();
-        if ($social_user->user_id) {
-            //如果绑定了PC端的账号,把所有的订单全部查出来返回
-
-            $all_user = SocialInfo::where('user_id', $social_user->user_id)->pluck('type', 'id');
-
-            foreach ($all_user as $id => $user_type) {
-                $builder->orWhere(function ($query) use ($id, $user_type) {
-                    $query->where([
-                        ['user_id', '=', $id],
-                        ['user_type', '=', $user_type]
-                    ]);
-                });
-            }
-            $builder->orWhere([
-                ['user_id', '=', $social_user->user_id],
-                ['user_type', '=', 'users']
-            ]);
-        } else {
-            $builder->orWhere([
-                ['user_id', '=', $social_user->id],
-                ['user_type', '=', $social_user->user_type]
-            ]);
-        }
+        //创建一个获取用户的用户表以及第三方表所有订单的查询构造器
+        $builder = create_relation_builder($social_user, \App\Models\Order::class);
         if ($only_orderId) {
             return $builder->orderBy('created_at', 'desc')->pluck('id');
         }

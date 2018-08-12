@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Requests\UserAddressRequest;
 use App\Models\Product;
 use App\Models\SocialInfo;
 use App\Models\User;
@@ -42,8 +43,30 @@ class UserAddressesController extends Controller
     }
 
     //添加收货地址接口
-    public function add()
+    public function add(UserAddressRequest $request)
     {
+        $user = $this->user();
+        $user_address = new UserAddress();
+        $user_address->fill($request->all());
+        $user_address->user_id = $user->id;
+        $user_address->user_type = 'mini';
+        $user_address->save();
+        return response('',201);
+    }
 
+    //修改收货地址接口
+    public function update(UserAddress $user_address, UserAddressRequest $request)
+    {
+        $this->authorize('update', $user_address);
+        $user_address->update($request->only([
+            'province',
+            'city',
+            'district',
+            'address',
+            'zip',
+            'contact_name',
+            'contact_phone',
+        ]));
+        return response('',201);
     }
 }

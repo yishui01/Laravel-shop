@@ -33,7 +33,7 @@ function normalize_xml($obj)
     return $result;
 }
 
-//解析小程序的userinfo
+//用session_key解密小程序的userinfo
 function resolveMiniUserInfo($session_key, $encryptedData, $iv)
 {
     $appid = env('WECHAT_MINI_PROGRAM_APPID');
@@ -63,24 +63,58 @@ function resolveMiniUserInfo($session_key, $encryptedData, $iv)
     return $result;
 }
 
-
-//API请求成功响应
-function success_json($data = [], $header = [])
+//组建一个获取用户某个表所有数据的查询构造器
+function create_relation_builder($user, $data_model_name)
 {
-    $response = response();
-    if (!empty($header) && is_array($header)) {
-       $response->withHeaders($header);
+    $builder = $data_model_name::query();
+    if ($user instanceof \App\Models\User) {
+        //传递的是PC端的账号模型，找出所有绑定了这个账号的第三方账号，合并返回
+        $all_user = \App\Models\SocialInfo::where('user_id', $user->id)->pluck('type', 'id');
+        foreach ($all_user as $id => $user_type) {
+            $builder->orWhere(function ($query) use ($id, $user_type) {
+                $query->where([
+                    ['user_id', '=', $id],
+                    ['user_type', '=', $user_type]
+                ]);
+            });
+        }
+        $builder->orWhere([
+            ['user_id', '=', $user->id],
+            ['user_type', '=', 'users']
+        ]);
+    } else if($user instanceof \App\Models\SocialInfo) {
+        //传递的是第三方表的用户模型，先看有没有绑定PC端的账号，绑定了那就查出所有第三方账号与PC端账号的数据合并返回
+        if ($user->user_id) {
+            //如果绑定了PC端的账号,把所有的订单全部查出来返回
+            $all_user = \App\Models\SocialInfo::where('user_id', $user->user_id)->pluck('type', 'id');
+
+            foreach ($all_user as $id => $user_type) {
+                $builder->orWhere(function ($query) use ($id, $user_type) {
+                    $query->where([
+                        ['user_id', '=', $id],
+                        ['user_type', '=', $user_type]
+                    ]);
+                });
+            }
+            $builder->orWhere([
+                ['user_id', '=', $user->user_id],
+                ['user_type', '=', 'users']
+            ]);
+        } else {
+            $builder->orWhere([
+                ['user_id', '=', $user->id],
+                ['user_type', '=', $user->user_type]
+            ]);
+        }
+    } else {
+        \Illuminate\Support\Facades\Log::error('user模型传递错误',['user'=>$user]);
+        throw new Exception('User模型错误');
     }
-    return $response->json($data);
+
+    return $builder;
 }
 
-//API请求错误响应
-function error_json($errcode = '500', $errmsg = '服务器内部错误')
-{
-    $data = ['errcode' => $errcode, 'errmsg'=>$errmsg];
-    return response()->json($data);
-}
-
+//获取客户端IP
 function get_client_ip(){
     if (getenv("HTTP_CLIENT_IP") && strcasecmp(getenv("HTTP_CLIENT_IP"), "unknown"))
         $ip = getenv("HTTP_CLIENT_IP");

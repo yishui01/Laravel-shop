@@ -13,22 +13,11 @@ class OrderPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Create a new policy instance.
-     *
-     * @return void
-     */
-    public function own(User $user, Order $order)
+    //验证这个订单是否是当前用户的
+    public function own($user, Order $order)
     {
-        return $order->user_id == $user->id;
+        $builder = create_relation_builder($user, \App\Models\Order::class);
+        return in_array($order->id, $builder->pluck('id')->toArray());
     }
 
-    //小程序端查看订单是否是本人的
-    public function miniOwn(SocialInfo $user, Order $order)
-    {
-        $orderService = new OrderService();
-        //获取这个用户下的所有订单ID，看请求的订单ID是否在ID数组中
-        $all_orders_id = $orderService->getAllOrders($user, true)->toArray();
-        return in_array($order->id, $all_orders_id);
-    }
 }

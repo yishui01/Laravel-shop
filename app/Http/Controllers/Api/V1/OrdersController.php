@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Transformers\OrderTransformer;
 class OrdersController extends Controller
 {
-    //下单接口
+    //下单
     public function store(OrderRequest $request, OrderService $orderService)
     {
 
@@ -36,12 +36,13 @@ class OrdersController extends Controller
         return $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon, 'mini');
     }
 
-    //订单列表页接口
+    //订单列表页
     public function index(OrderService $orderService)
     {
         //把PC端的订单和第三方的订单一起返回给用户
         $social_user = $this->user();
         $orders = $orderService->getAllOrders($social_user);
+
         //处理商品图片和订单状态
         foreach ($orders as &$order)
         {
