@@ -3,16 +3,9 @@
 namespace App\Http\Requests\Api\V1;
 
 use App\Models\ProductSku;
-use Illuminate\Validation\Rule;
-use Illuminate\Foundation\Http\FormRequest;
 
-class OrderRequest extends FormRequest
+class OrderRequest extends ApiBaseRequest
 {
-
-    public function authorize()
-    {
-        return true;
-    }
 
     public function rules()
     {

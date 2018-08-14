@@ -31,7 +31,10 @@ class OrdersController extends Controller
 
         // 如果用户提交了优惠码
         if ($code = $request->input('coupon_code')) {
-            $coupon = CouponCode::where('code', $code)->first();
+            $coupon = CouponCode::where([
+                ['code','=', $code],
+                ['enabled','=', 1],
+            ])->first();
             if (!$coupon) {
                 throw new CouponCodeUnavailableException('优惠券不存在');
             }

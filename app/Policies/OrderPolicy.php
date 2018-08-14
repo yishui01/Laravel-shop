@@ -17,6 +17,7 @@ class OrderPolicy
     public function own($user, Order $order)
     {
         $builder = create_relation_builder($user, \App\Models\Order::class);
+        //找出用户所有的订单ID，看这个ID是否包含在里面
         return in_array($order->id, $builder->pluck('id')->toArray());
     }
 

@@ -21,6 +21,9 @@ $api->version('v1', [
     $api->group([
         'middleware' => ['social','api.throttle']
     ], function ($api) {
+        //网站基本信息
+        $api->get('mini/web_info', 'WebInfosController@index')
+            ->name('api.mini.web_infos');
         // 小程序登录
         $api->post('mini/authorizations', 'AuthorizationsController@miniProgramLogin')
             ->name('api.mini.authorizations.store');
@@ -36,6 +39,9 @@ $api->version('v1', [
         //分类列表接口
         $api->get('mini/categories', 'CategoriesController@index')
             ->name('api.mini.categories.index');
+        //优惠券列表
+        $api->get('mini/coupon_codes','CouponCodesController@index')
+            ->name('api.mini.coupon_codes.index');
         //商品列表
         $api->get('mini/products', 'ProductsController@index')
             ->name('api.mini.products.index');
@@ -47,9 +53,25 @@ $api->version('v1', [
             ->name('api.mini.products.sku');
 
         $api->group(['middleware'=>['api.auth']], function ($api) {
-            //获取登录用户的地址
+            //领取优惠券
+            $api->post('mini/coupon_codes', 'CouponCodesController@receive')
+                ->name('api.coupon_codes.receive');
+            //获取登录用户的收货地址列表
             $api->get('mini/user_address', 'UserAddressesController@index')
                 ->name('api.user_address.index');
+            //获取用户收货地址详情
+            $api->get('mini/user_address/{user_address}', 'UserAddressesController@show')
+                ->name('api.user_address.show');
+            //添加用户收货地址
+            $api->post('mini/user_address', 'UserAddressesController@store')
+                ->name('api.user_address.store');
+            //修改用户收货地址
+            $api->put('mini/user_address/{user_address}', 'UserAddressesController@update')
+                ->name('api.user_address.update');
+            //删除用户收货地址
+            $api->delete('mini/user_address/{user_address}', 'UserAddressesController@destroy')
+                ->name('api.user_address.destroy');
+
             //下单
             $api->post('mini/orders', 'OrdersController@store')
                 ->name('api.orders.store');

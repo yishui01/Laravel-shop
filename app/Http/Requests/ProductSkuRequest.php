@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Exceptions\InvalidRequestException;
 use App\Models\Attribute;
+use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductSku;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class ProductSkuRequest extends Request
             $product_id = request()->input('product_id');
             $sku_id = request()->input('id');
                 //验证商品是否存在
-                $product = ProductSku::find($product_id);
+                $product = Product::find($product_id);
                 if (!$product) {
                     throw new InvalidRequestException('商品不存在', 400);
                 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class Request extends FormRequest
 {
@@ -27,4 +28,5 @@ class Request extends FormRequest
             //
         ];
     }
+
 }

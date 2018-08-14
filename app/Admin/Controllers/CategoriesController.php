@@ -104,7 +104,7 @@ class CategoriesController extends Controller
     {
         $category = new Category();
         $options_data = $category->getCateList();
-        $options = [];
+        $options = ['0'=>'顶级分类'];
         foreach ($options_data as $k => $v) {
             if($v['id'] == $id)continue;
             $options[$v['id']] = $v['text'];
