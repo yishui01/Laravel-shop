@@ -15,32 +15,14 @@ class UserAddressesController extends Controller
     //返回用户收货地址列表
     public function index()
     {
-        $social_user = Auth::guard('api')->user(); //根据token解析出对应的用户
+        $social_user = $this->user(); //根据token解析出对应的用户
         //var_dump($titles = Product::pluck('键值','键名')->toArray());
-        $builder = UserAddress::query();
-        if ($social_user->user_id) {
-            //如果绑定了PC端的账号,找出所有的第三方账号对应的地址，与PC端账号的地址一起返回
-            $all_data = SocialInfo::where('user_id', $social_user->user_id)->pluck('type', 'id');
-
-            foreach ($all_data as $id=>$user_type) {
-                $builder->orWhere(function ($query) use ($id, $user_type){
-                    $query->where('user_id', $id)->where('user_type', $user_type);
-                });
-            }
-
-            $builder->orWhere(function ($query) use ($social_user){
-                //这是PC的账号的收货地址
-                $query->where('user_id', $social_user->user_id)->where('user_type', 'users');
-            });
-        } else {
-            $builder->where('user_id', $social_user->user_id)->where('user_type', $social_user->type);
-        }
-
+        $builder = create_relation_builder($social_user, 'UserAddress');
         $address = $builder->orderBy('last_used_at', 'desc')->get();
         foreach ($address as &$v) {
             $v->full_address = $v->FullAddress;
         }
-        return $this->response->array($address)->setStatusCode(201);
+        return $this->response->collection($address, new UserAddressTransformer())->setStatusCode(201);
     }
 
     //收货地址详情
@@ -58,7 +40,7 @@ class UserAddressesController extends Controller
         $user_address->user_id = $user->id;
         $user_address->user_type = 'mini';
         $user_address->save();
-        return response('',201);
+        return $this->response->item($user_address, new UserAddressTransformer())->setStatusCode(201);
     }
 
     //修改收货地址接口

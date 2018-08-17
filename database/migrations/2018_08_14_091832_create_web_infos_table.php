@@ -19,7 +19,7 @@ class CreateWebInfosTable extends Migration
             $table->string('web_email')->nullable();
             $table->string('web_description')->nullable();
             $table->string('web_keywords')->nullable();
-            $table->string('web_notice')->nullable();
+            $table->text('web_notice')->nullable();
             $table->timestamps();
         });
     }

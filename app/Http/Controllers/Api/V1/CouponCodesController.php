@@ -19,8 +19,9 @@ class CouponCodesController extends Controller
             $query->whereNull('not_before')->orWhere('not_before','<=', date('Y-m-d H:i:s', time()));
         }) ->where(function ($query){
             //not_after的字段值为结束时间
-            $query->whereNull('not_after')->orWhere('not_before','>=', date('Y-m-d H:i:s', time()));
+            $query->whereNull('not_after')->orWhere('not_after','>=', date('Y-m-d H:i:s', time()));
         })->get();
+
         foreach ($data as $k=>$v) {
             //过滤掉库存不足的优惠券
             if ($v['used'] >= $v['total'])unset($data[$k]);
@@ -59,6 +60,6 @@ class CouponCodesController extends Controller
             //如果存在，那就是已经使用过优惠券了
             return $this->response->error('您已经使用过这张优惠券了',421);
         }
-        return $this->response->noContent()->setStatusCode(201);
+        return $this->response->item($couponCode, new CouponCodeTransformer())->setStatusCode(201);
     }
 }

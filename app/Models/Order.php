@@ -77,9 +77,16 @@ class Order extends Model
         });
     }
 
+    //与user表的关联关系
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    //与social_infos表的关联关系
+    public function social()
+    {
+        return $this->belongsTo(SocialInfo::class);
     }
 
     //订单sku

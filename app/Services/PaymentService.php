@@ -41,6 +41,7 @@ class PaymentService
             'total_fee' => $order->total_amount * 100, //订单总金额（微信的单位是分）
             'trade_type'=>'JSAPI'
          ];
+
          $sign = $this->setSign($data, $config['key']); //签名
          $data['sign'] = $sign;
          $body = $this->translateUnifyXml($data); //将数组转换为XML字符串
@@ -48,20 +49,23 @@ class PaymentService
          $response = $client->request('POST',$this->wechat_unify_url,[
             'body' => $body
          ]);
-
          $content = $response->getBody()->getContents();
          // 解析 响应xml 为数组
          $decryptedData = parse_xml($content);
          if ($decryptedData['return_code'] === 'SUCCESS') {
-             if ($this->checkSign($decryptedData, $config['key'])) {
+
+             if (!$this->checkSign($decryptedData, $config['key'])) {
                  throw new \Exception('微信服务器响应签名验证失败',500);
              }
-             if (isset($decryptedData['result_code']) === 'SUCCESS') {
+
+             if (isset($decryptedData['result_code']) && $decryptedData['result_code'] === 'SUCCESS') {
                  //下单成功,拿到预支付标识后再次签名
                 $prepay_id = $decryptedData['prepay_id']; //预支付交易会话标识,返回给小程序
                 $para_arr = $this->setMiniPayParam($prepay_id, $config);
                 return $para_arr;
              }
+
+
          }
 
          Log::error('调用微信统一下单API失败：',['response'=>$decryptedData]);
@@ -163,9 +167,7 @@ EOL;
     public function checkSign(array $decryptedData, $key)
     {
         if (!isset($decryptedData['sign']) || empty($decryptedData['sign'])) return false;
-        $str = $this->build_http_str($decryptedData);
-        $str.='&key='.$key;
-        $set_sign = $this->setSign($str, $key);
+        $set_sign = $this->setSign($decryptedData, $key);
         return $decryptedData['sign'] === $set_sign;
     }
 

@@ -13,27 +13,39 @@ use App\Models\CouponCode;
 use App\Exceptions\CouponCodeUnavailableException;
 use Illuminate\Support\Facades\Auth;
 use App\Transformers\OrderTransformer;
+use Illuminate\Support\Facades\Log;
+
 class OrdersController extends Controller
 {
     //下单
     public function store(OrderRequest $request, OrderService $orderService)
     {
 
-        $user = Auth::guard('api')->user();
+        $user = $this->user();
 
         $address = UserAddress::find($request->input('address_id'));
 
         $coupon = null;
 
         // 如果用户提交了优惠码
-        if ($code = $request->input('coupon_code')) {
+        if ($code = $request->input('coupon')) {
             $coupon = CouponCode::where('code', $code)->first();
             if (!$coupon) {
                 $this->response->error('优惠券不存在', 422);
             }
         }
+        try {
+            //dingoAPI不能触发laravel自定义异常的render方法吗，还要自己手动捕获才行，web端就可以触发异常自带的render方法啊
+            $order = $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon, 'mini');
+        } catch (\Exception $e){
+            if ($e->getCode() == 500) {
+                return $this->response->error('网络错误，下单失败', 500);
+            } else {
+                return $this->response->error($e->getMessage(), $e->getCode());
+            }
+        }
 
-        return $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon, 'mini');
+        return $this->response->item($order, new OrderTransformer())->setStatusCode(201);
     }
 
     //订单列表页
@@ -47,45 +59,67 @@ class OrdersController extends Controller
         foreach ($orders as &$order)
         {
             foreach ($order['items'] as &$item) {
+                //拼接图片地址
                 $item->product->fullImage = $item->product->fullImage;
             }
-            /**
-             * 订单状态：
-             * 1 => '待付款'
-             * 2 => '待发货'
-             * 3 => '已发货（待收货）'
-             * 4 => '待评价（已收货）',
-             * 5 => 已完成
-             */
-            if ($order->paid_at) {
-                //如果已经支付
-                if ($order->refund_status == Order::REFUND_STATUS_SUCCESS || $order->refund_status == Order::REFUND_STATUS_FAILED) {
-                    $order['status'] = 5; //已经退款完毕，已完成
-                } else {
-                    //否则显示五六状态
-                    if (Order::SHIP_STATUS_PENDING == $order->ship_status) {
-                        $order['status'] = 2;
-                    } else if(Order::SHIP_STATUS_DELIVERED == $order->ship_status) {
-                        $order['status'] = 3;
-                    } else if(Order::SHIP_STATUS_RECEIVED == $order->ship_status) {
-                        //已收货
-                        if ($order->reviewed) {
-                            $order['status'] = 5; //已评价
-                        } else {
-                            $order['status'] = 4;
-                        }
+            //放入订单状态字段，方便前端筛选
+            $order['status'] = $this->setStatus($order);
+        }
+        return $this->response->collection($orders, new OrderTransformer())->setStatusCode(201);
+
+    }
+
+    //订单详情
+    public function show(Order $order)
+    {
+        $order_info = $order->with(['items.productSku', 'items.product'])->find($order->id);
+        foreach ($order_info['items'] as &$item) {
+            //拼接图片地址
+            $item->product->fullImage = $item->product->fullImage;
+        }
+        $order_info['status'] = $this->setStatus($order_info);
+        return $this->response->item($order_info, new OrderTransformer())->setStatusCode(201);
+    }
+
+    //判断当前订单状态，返回给前端方便筛选
+    public function setStatus(Order $order)
+    {
+        /**
+         * 订单状态：
+         * 1 => '待付款'
+         * 2 => '待发货'
+         * 3 => '已发货（待收货）'
+         * 4 => '待评价（已收货）',
+         * 5 => 已完成
+         */
+        $status = null;
+        if ($order->paid_at) {
+            //如果已经支付
+            if ($order->refund_status == Order::REFUND_STATUS_SUCCESS || $order->refund_status == Order::REFUND_STATUS_FAILED) {
+                $status = 5; //已经退款完毕，已完成
+            } else {
+                //否则显示五六状态
+                if (Order::SHIP_STATUS_PENDING == $order->ship_status) {
+                    $status = 2;
+                } else if(Order::SHIP_STATUS_DELIVERED == $order->ship_status) {
+                    $status = 3;
+                } else if(Order::SHIP_STATUS_RECEIVED == $order->ship_status) {
+                    //已收货
+                    if ($order->reviewed) {
+                        $status = 5; //已评价
+                    } else {
+                        $status = 4;
                     }
                 }
-            } else if($order->closed) {
-                //订单已关闭
-                $order['status'] = 5;
-            } else {
-                //未支付
-                $order['status'] = 1;
             }
+        } else if($order->closed) {
+            //订单已关闭
+            $status = 5;
+        } else {
+            //未支付
+            $status = 1;
         }
-        return $this->response->array($orders)->setStatusCode(201);
-        //return $this->response->collection($orders, new OrderTransformer($orders))->setStatusCode(201);
 
+        return $status;
     }
 }

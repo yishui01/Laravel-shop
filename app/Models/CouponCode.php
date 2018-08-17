@@ -62,7 +62,7 @@ class CouponCode extends Model
     }
 
     //检查优惠卷的有效性
-    public function checkAvailable(User $user, $orderAmount = null, $request_type = 'users')
+    public function checkAvailable($user, $orderAmount = null, $request_type = 'users')
     {
         if (!$this->enabled) {
             throw new CouponCodeUnavailableException('优惠券不存在');

@@ -98,7 +98,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
         // 这里我们直接使用 dispatch 函数
         dispatch(new CloseOrder($order, config('myconfig.order.order_ttl')));
 
-        return response('下单成功','201');
+        return $order;
     }
 
     /**
@@ -106,10 +106,10 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
      * @param SocialInfo $socialInfo
      * @param bool $only_orderId 是否只返回所有订单的ID
      */
-    public function getAllOrders(SocialInfo $social_user, $only_orderId = false)
+    public function getAllOrders($user, $only_orderId = false)
     {
         //创建一个获取用户的用户表以及第三方表所有订单的查询构造器
-        $builder = create_relation_builder($social_user, \App\Models\Order::class);
+        $builder = create_relation_builder($user, \App\Models\Order::class);
         if ($only_orderId) {
             return $builder->orderBy('created_at', 'desc')->pluck('id');
         }

@@ -8,6 +8,8 @@ use App\Http\Requests\Request;
 use App\Models\Order;
 use App\Http\Requests\Admin\HandleRefundRequest;
 
+use App\Models\SocialInfo;
+use App\Models\User;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Facades\Admin;
@@ -75,13 +77,16 @@ class OrdersController extends Controller
      */
     protected function grid()
     {
-        return Admin::grid(Order::class, function (Grid $grid) {
+        $that = $this;
+        return Admin::grid(Order::class, function (Grid $grid) use($that) {
             // 只展示已支付的订单，并且默认按支付时间倒序排序
             $grid->model()->whereNotNull('paid_at')->orderBy('paid_at', 'desc');
 
             $grid->no('订单流水号');
             // 展示关联关系的字段时，使用 column 方法
-            $grid->column('user.name', '买家');
+            $grid->user_id('买家')->display(function ($value) use ($that){
+                return $that->getUserName($value, $this->user_type);
+            });
             $grid->total_amount('总金额')->sortable();
             $grid->paid_at('支付时间')->sortable();
             $grid->ship_status('物流')->display(function($value) {
@@ -111,6 +116,22 @@ class OrdersController extends Controller
         });
     }
 
+    //获取下单的用户名
+    protected function getUserName($user_id, $user_type)
+    {
+        if ($user_type == 'users') {
+            $prefix = 'PC账号：';
+            return $prefix.User::select(\DB::raw('name'))->find($user_id)->name;
+        } else {
+            $prefix = '未知账号：';
+            switch ($user_type) {
+                case 'mini':
+                    $prefix = '小程序账号：';
+            }
+            return $prefix.SocialInfo::select(\DB::raw('nickname'))->find($user_id)->nickname;
+        }
+    }
+
     /**
      * Make a form builder.
      *
@@ -130,10 +151,12 @@ class OrdersController extends Controller
     //自定义方法---订单详情
     public function show(Order $order)
     {
-        return Admin::content(function (Content $content) use ($order){
+        $that = $this;
+        return Admin::content(function (Content $content) use ($order, $that){
             $content->header('查看订单');
             //body方法可以接受laravel的视图作为参数
-            $content->body(view('admin.orders.show', ['order'=>$order]));
+            $username = $that->getUserName($order->user_id, $order->user_type);
+            $content->body(view('admin.orders.show', ['order'=>$order, 'username'=>$username]));
         });
     }
 

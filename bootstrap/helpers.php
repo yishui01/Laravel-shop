@@ -107,7 +107,7 @@ function create_relation_builder($user, $data_model_name)
         } else {
             $builder->where([
                 ['user_id', '=', $user->id],
-                ['user_type', '=', $user->user_type]
+                ['user_type', '=', $user->type]
             ]);
         }
     } else {

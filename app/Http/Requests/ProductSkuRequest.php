@@ -39,7 +39,7 @@ class ProductSkuRequest extends Request
                             'attributes'=>'',
                             'product_id'=>$product_id
                         ])->where('id','<>', $sku_id)->first();
-                        return $fail('该商品SKU已存在');
+                        if ($res)return $fail('该商品SKU已存在');
                     } else {
                         //查找本次提交的属性值是否有新属性值，有的话必然是新SKU
                         $isnew = false;

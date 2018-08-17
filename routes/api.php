@@ -75,9 +75,12 @@ $api->version('v1', [
             //下单
             $api->post('mini/orders', 'OrdersController@store')
                 ->name('api.orders.store');
-            //获取用户的订单信息
+            //获取用户的订单列表页信息
             $api->get('mini/orders', 'OrdersController@index')
                 ->name('api.orders.index');
+            //获取某个订单详情
+            $api->get('mini/orders/{order}', 'OrdersController@show')
+                ->name('api.orders.show');
             //小程序微信支付 //微信支付回调通知url以及退款都在web.php中定义，与web端共用一套路由
             $api->get('mini/payment/wechat/{order}', 'PaymentController@miniPayByWechat')
                 ->name('api.payement.wechat');
