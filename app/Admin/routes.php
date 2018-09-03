@@ -13,14 +13,16 @@ Route::group([
 
     //用户
     $router->resource('users', 'UsersController');
-    //商品
-    $router->resource('products', 'ProductsController');
-    //商品SKU
-    $router->resource('skus', 'ProductSkusController');
     //优惠券
     $router->resource('coupon_codes', 'CouponCodesController');
     //商品分类
     $router->resource('categories', 'CategoriesController');
+    //商品列表
+    $router->resource('products', 'ProductsController');
+    //商品属性值列表
+    $router->resource('attributes', 'AttributesController');
+    //商品SKU
+    $router->resource('skus', 'ProductSkusController');
 
     //订单列表
     $router->get('orders', 'OrdersController@index')->name('admin.orders.index');

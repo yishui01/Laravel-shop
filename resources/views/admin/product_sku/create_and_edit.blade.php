@@ -43,6 +43,7 @@
 
                     </div>
                 </div>
+
                 <div id="attributes">
                     @foreach($attributes as $v)
                     <div class="form-group myshow">
@@ -168,10 +169,10 @@
                 dataType:'json',
                 success:function (data) {
                     if (data.length == 0) {
-                        swal({
-                            title: '该商品还未设置属性',
+                        /*swal({
+                            title: '该商品没有可选属性',
                             type: 'warning'
-                        });
+                        });*/
                         $("#attributes").html('');
                     } else {
                         var el = '';

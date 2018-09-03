@@ -14,18 +14,25 @@ class SeedCategoriesData extends Migration
      */
     public function up()
     {
+        $now = \Illuminate\Support\Carbon::now()->toDatetimeString();
         $categories = [
             [
                 'name'   => '手机',
                 'isshow' => 'A', //A代表显示
+                'created_at' => $now,
+                'updated_at' => $now
             ],
             [
                 'name'   => '服装',
                 'isshow' => 'A', //A代表显示
+                'created_at' => $now,
+                'updated_at' => $now
             ],
             [
                 'name'   => '电器',
                 'isshow' => 'A', //A代表显示
+                'created_at' => $now,
+                'updated_at' => $now
             ],
         ];
         DB::table('categories')->insert($categories);

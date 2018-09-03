@@ -95,7 +95,8 @@ class ProductSkusController extends Controller
     protected function grid()
     {
         return Admin::grid(ProductSku::class, function (Grid $grid) {
-
+            Admin::script("$('a[href=\"/admin/skus/create\"]').attr('no-pjax', '');");
+            Admin::script("$('a[href$=\"/edit\"]').attr('no-pjax', '');");
             $grid->model()->orderBy('id', 'desc');
             $grid->id('ID')->sortable();
 

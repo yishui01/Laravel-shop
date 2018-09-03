@@ -127,6 +127,8 @@ class Order extends Model
             $no = Uuid::uuid4()->getHex();
             //查询生成的退款订单号在数据库中是否存在
         } while (self::query()->where('refund_no', $no)->exists());
+        
+        return $no;
     }
 
 

@@ -8,6 +8,7 @@ use App\Models\SocialInfo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 class AuthorizationsController extends Controller
 {

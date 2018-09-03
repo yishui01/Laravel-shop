@@ -49,7 +49,6 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        echo 123456;die;
         return parent::render($request, $exception);
     }
 }

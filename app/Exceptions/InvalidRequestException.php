@@ -18,7 +18,7 @@ class InvalidRequestException extends Exception
         if ($request->expectsJson()) {
             return response()->json(['msg'=>$this->message], $this->code);
         }
-
+        
         return view('pages.error', ['msg'=>$this->message]);
     }
 }
