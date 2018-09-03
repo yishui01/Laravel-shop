@@ -6,7 +6,7 @@
  */
 
 require('./bootstrap');
-
+require('sweetalert');
 window.Vue = require('vue');
 
 /**

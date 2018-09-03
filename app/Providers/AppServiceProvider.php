@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\ProductSku;
+use App\Observer\ProductSkuObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Monolog\Logger;
@@ -16,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+        ProductSku::observe(ProductSkuObserver::class);
     }
 
     /**

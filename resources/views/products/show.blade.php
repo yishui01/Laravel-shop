@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('title', $product->title)
-
 @section('content')
     <div class="row">
         <div class="col-lg-10 col-lg-offset-1">
@@ -21,7 +20,7 @@
                             <div class="skus">
                                     @foreach($select_attr as $k=>$attr)
                                        <label>{{$attr['name']}}</label>
-                                        @foreach($attr['data'] as $val)
+                                        @foreach($attr['attribute'] as $val)
                                             <span onclick="click_attr(this);" data-group="{{$k}}" class="sku_btn btn btn-default" data-id="{{$val['id']}}">
                                             {{{$val['attr_val']}}}
                                              </span>
@@ -90,7 +89,7 @@
 </style>
 @section('scriptsAfterJs')
     <script>
-        var check_arr = []; //用户选择的SKU
+        var check_arr = []; //用户当前选择的商品属性数组['属性名组id'=>属性值ID]
         var sku_arr = []; //现有的SKU
         @if(count($select_attr)) //有可选属性就把skuid先置为零，选完属性再变化
         var skuid = 0;
@@ -100,7 +99,7 @@
         var skuid = 0;
         @endif
         var count = {{count($select_attr)}};
-        var check_count = 0; //已经
+        var check_count = 0; //已经选择的属性数量
         @foreach($skus as $sku)
         sku_arr.push({'key':"{{$sku->attributes}}", 'val':{price:{{$sku->price}},stock:{{$sku->stock}}, id:{{$sku->id}}} });
         @endforeach
@@ -163,7 +162,10 @@
                 }, function(error) { // 请求失败会执行这个回调
                     // 如果返回码是 401 代表没登录
                     if (error.response && error.response.status === 401) {
-                        swal('请先登录', '', 'error');
+                        swal('请先登录', '', 'success')
+                            .then(function () {
+                                location.href='/login';
+                            });
                     } else if (error.response && error.response.data.msg) {
                         // 其他有 msg 字段的情况，将 msg 提示给用户
                         swal(error.response.data.msg, '', 'error');
@@ -205,12 +207,42 @@
                     amount: amount,
                 })
                     .then(function () { // 请求成功执行此回调
-                        swal('加入购物车成功', '', 'success');
+                        swal({
+                            title:"加入购物车成功",
+                            text:"",
+                            icon:"success",
+                            buttons: {
+
+                                confirm: {
+                                    text: "前往结算",
+                                    value: true,
+                                    visible: true,
+                                    className: "",
+                                    closeModal: true
+                                },
+                                cancel: {
+                                    text: "继续购物",
+                                    value: false,
+                                    visible: true,
+                                    className: "",
+                                    closeModal: true,
+                                }
+                            }
+                        }).then(function (value) {
+                            if (value) {
+                                location.href='{{route('cart.index')}}';
+                            }
+                        });
+
+
                     }, function (error) { // 请求失败执行此回调
                         if (error.response.status === 401) {
 
                             // http 状态码为 401 代表用户未登陆
-                            swal('请先登录', '', 'error');
+                            swal('请先登录', '', 'success')
+                                .then(function () {
+                                    location.href='/login';
+                                });
 
                         } else if (error.response.status === 422) {
 

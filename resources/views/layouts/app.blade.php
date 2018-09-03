@@ -9,6 +9,7 @@
     <title>@yield('title', 'Laravel Shop') - Laravel 电商教程</title>
     <!-- 样式 -->
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    @stack('MyFontStyle')
 </head>
 <body>
 <div id="app" class="{{ route_class() }}-page">
@@ -21,6 +22,7 @@
 </div>
 <!-- JS 脚本 -->
 <script src="{{ mix('js/app.js') }}"></script>
+@stack('MyFontScripts')
 @yield('scriptsAfterJs')
 
 </body>

@@ -47200,7 +47200,7 @@ module.exports = function(module) {
  */
 
 __webpack_require__("./resources/assets/js/bootstrap.js");
-
+__webpack_require__("./node_modules/sweetalert/dist/sweetalert.min.js");
 window.Vue = __webpack_require__("./node_modules/vue/dist/vue.common.js");
 
 /**
@@ -47221,7 +47221,6 @@ var app = new Vue({
 /***/ "./resources/assets/js/bootstrap.js":
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__("./node_modules/sweetalert/dist/sweetalert.min.js");
 window._ = __webpack_require__("./node_modules/lodash/lodash.js");
 
 /**
