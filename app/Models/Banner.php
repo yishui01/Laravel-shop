@@ -12,4 +12,11 @@ class Banner extends Model
     {
         return $query->where('isshow', 1);
     }
+
+    public function getUrlAttribute($value)
+    {
+        if (strpos($value, 'http') === false) {
+            return env('APP_URL').'/uploads/'.$value;
+        }
+    }
 }

@@ -123,11 +123,15 @@ class BannersController extends Controller
             }
 
             $form->display('id', 'ID');
-            $form->text('url', '轮播图地址');
-            $form->text('place', '轮播图位置')->placeholder('mini-index为小程序首页轮播，pc-index为PC首页轮播')->default('mini-index');
-            $form->radio('type', '轮播图类型')->options(['A'=>'商品轮播', 'B'=>'外部链接'])->default('A');
-            $form->select('product_id', '关联商品ID')->options($options);
-            $form->text('link', '轮播图链接');
+            $form->file('url', '图片');
+            $form->radio('place', '轮播图位置')
+                ->options(['mini-index'=>'小程序首页轮播', 'pc-index'=>'PC首页轮播'])
+                ->default('mini-index');
+            $form->radio('type', '轮播图类型')
+                ->options(['A'=>'商品轮播', 'B'=>'外部链接'])
+                ->default('A');
+            $form->select('product_id', '跳转到的商品页面')->options($options);
+            $form->text('link', '如果是外部链接，请在此输入链接，否则不用填写');
             $form->text('title','轮播图标题');
             $form->text('sort','轮播图排序')->default(0)->placeholder('数值越大越靠前');
             $form->radio('isshow','是否显示')->options(['0'=>'不显示','1'=>'显示'])->default('0');
