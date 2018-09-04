@@ -71,7 +71,6 @@ class ProductsController extends Controller
             $favorite = $user->favoriteProducts()->find($product->id);
         }
         $reviews = $product->getReview();     //商品评价数据
-
         return view('products.show',
             [
                 'product'=>$product,

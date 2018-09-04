@@ -17,6 +17,8 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'email', 'password','email_verified',
+        'wx_web_openid','wx_mini_openid','wx_unionid','session_key',
+        'status', 'extra','avatar','phone'
     ];
 
     /**

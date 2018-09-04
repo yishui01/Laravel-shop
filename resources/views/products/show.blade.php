@@ -49,6 +49,10 @@
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="product-detail-tab">
+                                @foreach($unique_attr as $k=>$v)
+                                    {{$v->name}}：{{$v->val}}
+                                    @endforeach
+                                <hr />
                                 {!! $product->description !!}
                             </div>
                             <div role="tabpanel" class="tab-pane" id="product-reviews-tab">
@@ -162,7 +166,7 @@
                 }, function(error) { // 请求失败会执行这个回调
                     // 如果返回码是 401 代表没登录
                     if (error.response && error.response.status === 401) {
-                        swal('请先登录', '', 'success')
+                        swal('请先登录', '', 'warning')
                             .then(function () {
                                 location.href='/login';
                             });
@@ -239,7 +243,7 @@
                         if (error.response.status === 401) {
 
                             // http 状态码为 401 代表用户未登陆
-                            swal('请先登录', '', 'success')
+                            swal('请先登录', '', 'warning')
                                 .then(function () {
                                     location.href='/login';
                                 });

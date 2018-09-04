@@ -1,103 +1,89 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\v1;
 
-use App\Http\Requests\Api\V1\MiniLoginRequest;
+use App\Exceptions\InvalidRndomRulesException;
 use App\Http\Requests\Api\V1\MiniRegisterRequest;
-use App\Models\SocialInfo;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Api\V1\MiniLoginRequest;
+use App\Models\User;
+use App\Transformers\UserTransformer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Response;
-use Tymon\JWTAuth\Facades\JWTAuth;
-class AuthorizationsController extends Controller
+
+class UsersController extends Controller
 {
-    //小程序登录，成功返回201.其他均为失败
-    public function miniProgramLogin(MiniLoginRequest $request)
+    //小程序登录，成功返回201，其他均为失败
+    public function miniLogin(MiniLoginRequest $request)
     {
-        $code = $request->code;
-        //根据code获取微信的openid和session_key
-        $mini = \EasyWeChat::miniProgram();
-        $data = $mini->auth->session($code);
-        // 如果结果错误，说明 code 已过期或不正确，返回 401 错误
-        if (isset($data['errcode'])) {
-            return $this->response->errorUnauthorized('code 不正确或已过期');
-        }
-
-        $social_info = $this->checkRegister($data['openid'], 'mini', $data['unionid'] ?? 0);
-
-        if (!$social_info) {
-            //如果该用户之前没有注册过账号，返回400，让客户端拉起授权页面
-            return $this->response->error('用户还未授权','400');
-        }
-
-        //如果表中已经存在用户记录，更新session_key,返回token
-        try{
-            $social_info->session_key = $data['session_key'];
-            $social_info->save();
-            $token = Auth::guard('api')->fromUser($social_info);
-            return $this->responseWithToken($token)->setStatusCode(201);
+        $miniProgram = \EasyWeChat::miniProgram(); // 小程序
+        try {
+            $data = $miniProgram->auth->session($request->code); //返回openid
         } catch (\Exception $e) {
-            Log::error('cannot create  mini token ',['msg'=>$e->getMessage().'\n'.$e->getFile().'\n'.$e->getLine()]);
-            return $this->response->error('server error','500');
+            return $this->recordAndResponse($e, '通过code解析openid时抛出异常', '解析code失败');
+        }
+
+        if (isset($data['errcode'])) {
+            return $this->badCodeResponse();
+        }
+        //查询该用户的openid或者unionid是否已经注册过
+        $user = $this->checkRegister($data['openid'], 'wx_mini', $data['unionid'] ?? 0);
+        if (!$user) {
+            return $this->response->errorUnauthorized('用户未注册，请拉起授权页面提示用户授权');
+        }
+        //已经注册
+        if ($user->status == 0) {
+            return $this->response->error('该用户已被禁用', 403);
+        }
+        try{
+            $token = Auth::guard('api')->fromUser($user);
+            return $this->responseWithToken($token,$user)->setStatusCode(201);
+        } catch (\Exception $e) {
+            return $this->recordAndResponse($e, '发放token失败', '验证服务器错误');
         }
 
     }
 
-    //小程序用户授权后的回调接口，注册用户信息到第三方用户表中，成功返回201，其他均为失败
-    public function miniProgramStore(MiniRegisterRequest $request)
+    //小程序用户注册接口
+    public function miniRegister(MiniRegisterRequest $request)
     {
-        $mini = \EasyWeChat::miniProgram();
-        $data = $mini->auth->session($request->code);
+        $miniProgram = \EasyWeChat::miniProgram(); // 小程序
+        try {
+            $data = $miniProgram->auth->session($request->code); //返回openid
+        } catch (\Exception $e) {
+            return $this->recordAndResponse($e, '通过code解析openid时抛出异常', '解析code失败');
+        }
         // 如果结果错误，说明 code 已过期或不正确，返回 401 错误
         if (isset($data['errcode'])) {
-            return $this->response->errorUnauthorized('code 不正确或已过期');
+            return $this->badCodeResponse();
         }
-
         try{
             //解密数据->检查是否注册->?入库->返回token
             $info = resolveMiniUserInfo($data['session_key'], $request->encryptedData, $request->iv);
             $info = json_decode($info);
             //看下这个openid或者unionid有没有被注册,如果已经注册了，直接返回，没有就注册再返回
-            $social_info = $this->checkRegister($data['openid'], 'mini', $data['unionid'] ?? 0);
-            if (!$social_info) {
+            $user = $this->checkRegister($data['openid'], 'wx_mini', $data['unionid'] ?? 0);
+            if (!$user) {
                 //未注册时注册新用户
-                $social_info = SocialInfo::create([
-                    'openid'      => $info->openId,
-                    'unionid'     => $info->unionId ?? null,
-                    'session_key' => $data['session_key'],
-                    'type'        => 'mini',
-                    'avatar'      => $info->avatarUrl,
-                    'nickname'    => $info->nickName,
-                    'gender'      => $info->gender,
-                    'user_id'     => null,
-                    'extra'       => json_encode($info)
+                $user = User::create([
+                    'wx_mini_openid'  => $info->openId,
+                    'wx_unionid'      => $info->unionId ?? null,
+                    'avatar'         => $info->avatarUrl,
+                    'name'            => $info->nickName,
+                    'extra'           => json_encode($info),
                 ]);
             }
 
             try {
-                $token = Auth::guard('api')->fromUser($social_info);
-                return $this->responseWithToken($token)->setStatusCode(201);
+                $token = Auth::guard('api')->fromUser($user);
+                return $this->responseWithToken($token,$user)->setStatusCode(201);
             } catch (\Exception $e) {
-                Log::error('cannot create  mini token ',['msg'=>$e->getMessage().'\n'.$e->getFile().'\n'.$e->getLine()]);
-                return $this->response->error('server error','500');
+                return $this->recordAndResponse($e, '发放token失败', '验证服务器错误');
             }
 
         }catch (\Exception $e) {
-            Log::error('小程序注册失败：'.$e->getFile().$e->getLine().$e->getMessage());
-            $this->response->error('获取用户信息失败', '400');
+            return $this->recordAndResponse($e, '小程序注册失败', '小程序注册失败');
         }
-
-    }
-
-    //返回生成token的响应
-    public function responseWithToken($token)
-    {
-        return $this->response->array([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'expires_in' => Auth::guard('api')->factory()->getTTL()
-        ]);
     }
 
     //校验小程序的token是否有效，返回201状态码代表有效，其他的全部为无效token
@@ -110,26 +96,72 @@ class AuthorizationsController extends Controller
             }
         }catch (\Exception $e) {
             //token无效
-            $this->response->error('token已经失效', 400);
+            $this->response->errorUnauthorized('token已经失效');
         }
-        $this->response->error('',201);
+
+        return $this->response->item($user,new UserTransformer())
+            ->setStatusCode(201);
     }
 
-    //检查第三方用户是否注册，注册了返回已有的user信息，否则返回null
-    public function checkRegister($openid = 0,$type = '', $unionid = 0)
+    //查找第三方openid是否已经注册过了，注册了则返回user信息，否则返回null
+    public function checkRegister($openid = 0,$type = '',$unionid = 0)
     {
-        $social_info = null;
-        //如果获取到了unionid或者openid,查找对应的用户是否存在
-        if (isset($unionid) && !empty($unionid)) {
-            //如果有unionid，直接用unionid查找是否有该用户
-            $social_info = SocialInfo::where('unionid', $unionid)
-                ->where(function ($query){
-                    $query->where('type', 'wechat')
-                        ->orWhere('type', 'mini');
-                })->first();
-        } else if(isset($openid) && !empty($openid)) {
-            $social_info = SocialInfo::where('openid', $openid)->where('type', $type)->first();
+        $user = null;
+        if ($type == 'wx_mini' || $type == 'wx_web') {
+            //如果是小程序或者公众号登录
+            if ($type == 'wx_mini') {
+                $key = 'wx_mini_openid';
+            } elseif ($type == 'wx_web') {
+                $key = 'wx_web_openid';
+            }
+            if ($unionid) {
+                //如果传入了unionid则先找unionid
+                $user = User::where('wx_unionid', $unionid)->first();
+                if ($user) {
+                    //如果找到了，那就准备直接返回了，如果对应的openid为空
+                    if (empty($user->$key)) {
+                        $user->$key = $openid;
+                        $user->save();
+                    }
+                    return $user;
+                }
+            }
+
+            //没有通过unionid找到用户，那就再用openid找一次
+            $user = User::where($key, $openid)->first();
         }
-        return $social_info;
+
+        return $user;
     }
+
+    //登录成功，返回token和用户信息
+    protected function responseWithToken($token, $user)
+    {
+        return $this->response->array([
+            'access_token'=> $token,
+            'token_type'  => 'Bearer',
+            'user'        => [
+                'id'            => $user->id,
+                'name'          => $user->name,
+                'email'         => $user->email,
+                'headimg'       => $user->avatar,
+                'phone'         => $user->phone,
+                ]
+        ]);
+    }
+
+    //捕获未定义异常时执行的函数
+    protected function recordAndResponse(\Exception $e, $log_message, $response_message)
+    {
+        Log::error($log_message,['msg'=>$e->getMessage().'\n'.$e->getFile().'\n'.$e->getLine()]);
+        return $this->response->error($response_message,'500');
+    }
+
+    //无效code
+    public function badCodeResponse()
+    {
+        return $this->response->error('code不正确或者已过期', 402);
+    }
+
+
 }
