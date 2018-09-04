@@ -83,12 +83,6 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    //与social_infos表的关联关系
-    public function social()
-    {
-        return $this->belongsTo(SocialInfo::class);
-    }
-
     //订单sku
     public function items()
     {

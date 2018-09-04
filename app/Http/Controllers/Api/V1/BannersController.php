@@ -10,6 +10,7 @@ class BannersController extends Controller
 {
     public function index()
     {
-        return $this->response->collection(Banner::show()->orderBy('sort', 'desc')->get(), new BannerTransformer());
+        return $this->response->collection(Banner::show()->orderBy('sort', 'desc')
+            ->get(), new BannerTransformer())->setStatusCode($this->success_code);
     }
 }

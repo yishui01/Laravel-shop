@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\CouponCode;
-use App\Models\SocialInfo;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Order;
@@ -25,16 +24,16 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
     而使用 app() 或者自动解析注入等方式 Laravel 则会自动帮我们处理掉这些依赖。
 之前在控制器中可以通过 $this->dispatch() 方法来触发任务类，但在我们的封装的类中并没有这个方法，
     因此关闭订单的任务类改为 dispatch() 辅助函数来触发。*/
-    public function store($user, UserAddress $address, $remark, $items, CouponCode $coupon = null, $request_type = 'users')
+    public function store(User $user, UserAddress $address, $remark, $items, CouponCode $coupon = null)
     {
         // 如果传入了优惠券，则先检查是否可用
         if ($coupon) {
             // 但此时我们还没有计算出订单总金额，因此先不传订单总金额，不会校验是否达到最小金额
-            $coupon->checkAvailable($user, null, $request_type);
+            $coupon->checkAvailable($user, null);
         }
 
         // 开启一个数据库事务
-        $order = \DB::transaction(function () use ($user, $address, $remark, $items, $coupon, $request_type) {
+        $order = \DB::transaction(function () use ($user, $address, $remark, $items, $coupon) {
             // 更新此地址的最后使用时间
             $address->update(['last_used_at' => Carbon::now()]);
             // 创建一个订单
@@ -50,7 +49,6 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
             ]);
 
             $order->user_id = $user->id;
-            $order->user_type = $request_type;
             // 写入数据库
             $order->save();
 
@@ -68,7 +66,8 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                 $item->save();
                 $totalAmount += $sku->price * $data['amount'];
                 if ($sku->decreaseStock($data['amount']) <= 0) {
-                    throw new InvalidRequestException('该商品库存不足');
+                    //这里也改用403吧，一样的，请求拒绝执行
+                    throw new CouponCodeUnavailableException('该商品库存不足');
                 }
             }
             if ($coupon) {
@@ -86,11 +85,9 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
             // 更新订单总金额
             $order->update(['total_amount' => $totalAmount]);
 
-            if ($request_type == 'users') {
-                // 将下单的商品从购物车中移除
-                $skuIds = collect($items)->pluck('sku_id')->all();
-                app(CartService::class)->remove($skuIds);
-            }
+            // 将下单的商品从购物车中移除
+            $skuIds = collect($items)->pluck('sku_id')->all();
+            app(CartService::class)->remove($skuIds);
 
             return $order;
         });
@@ -103,16 +100,16 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
 
     /**
      * 获取该用户的所有订单
-     * @param SocialInfo $socialInfo
      * @param bool $only_orderId 是否只返回所有订单的ID
      */
-    public function getAllOrders($user, $only_orderId = false)
+    public function getAllOrders(User $user, $only_orderId = false)
     {
-        //创建一个获取用户的用户表以及第三方表所有订单的查询构造器
-        $builder = create_relation_builder($user, \App\Models\Order::class);
+        $builder = Order::query()->where('user_id', $user->id);
         if ($only_orderId) {
-            return $builder->orderBy('created_at', 'desc')->pluck('id');
+            return $builder->orderBy('created_at', 'desc')
+                ->pluck('id');
         }
-        return $builder->with(['items.productSku', 'items.product']) ->orderBy('created_at', 'desc')->get();
+        return $builder->with(['items.productSku', 'items.product'])
+            ->orderBy('created_at', 'desc')->get();
     }
 }

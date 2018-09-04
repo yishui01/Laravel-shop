@@ -62,7 +62,7 @@ class CouponCode extends Model
     }
 
     //检查优惠卷的有效性
-    public function checkAvailable($user, $orderAmount = null, $request_type = 'users')
+    public function checkAvailable($user, $orderAmount = null)
     {
         if (!$this->enabled) {
             throw new CouponCodeUnavailableException('优惠券不存在');
@@ -86,7 +86,6 @@ class CouponCode extends Model
 
         $used = Order::where('user_id', $user->id)
             ->where('coupon_code_id', $this->id)
-            ->where('user_type', $request_type)
             ->where(function ($query){
                 $query->where(function ($query){
                     $query->whereNull('paid_at')
@@ -119,7 +118,9 @@ class CouponCode extends Model
         // 传入 true 代表新增用量，否则是减少用量
         if ($increase) {
             // 与检查 SKU 库存类似，这里需要检查当前用量是否已经超过总量
-            return $this->newQuery()->where('id', $this->id)->where('used', '<', $this->total)->increment('used');
+            return $this->newQuery()->where('id', $this->id)
+                ->where('used', '<', $this->total)
+                ->increment('used');
         } else {
             return $this->decrement('used');
         }

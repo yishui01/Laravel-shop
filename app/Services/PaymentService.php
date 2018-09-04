@@ -3,7 +3,7 @@
 namespace App\Services;
 use App\Http\Requests\Request;
 use App\Models\Order;
-use App\Models\SocialInfo;
+use App\Models\User;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
@@ -12,19 +12,15 @@ class PaymentService
     private $wechat_unify_url = 'https://api.mch.weixin.qq.com/pay/unifiedorder'; //微信支付统一下单API
 
     //小程序微信支付调用统一下单API，并返回微信小程序拉起支付所需要的参数
-    public function miniPayByWechat(Order $order, SocialInfo $socialInfo)
+    public function miniPayByWechat(Order $order, User $user)
     {
-     try{
+
         $config = config('pay.mini'); //获取已有的微信配置信息
         $client = new Client(['timeout'=>2.0]); //设置超时时间
         //$noce_str = 'd8b1033b1b4616b6d32b07da2ef64863';
         $noce_str = md5(mt_rand(1, 9999999).microtime());//随机数
         $notify_url = route($config['notify_url_route_name']); //服务端回调地址
-        $client_ip = get_client_ip(); //客户端IP
-         if ($client_ip == 'unknown') {
-             Log::error('IP地址未能获取', ['SERVER'=>$_SERVER]);
-             $client_ip = '0.0.0.0';
-         }
+        $client_ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
          $attach = 'test'; //附加数据
          $body = 'testproduct';//商品描述
@@ -35,7 +31,7 @@ class PaymentService
             'mch_id'    => $config['mch_id'],
             'nonce_str'  => $noce_str, //随机数
             'notify_url'=> $notify_url, //服务端通知地址,
-            'openid'    => $socialInfo->openid,//小程序用户openid
+            'openid'    => $user->wx_mini_openid,//小程序用户openid
             'out_trade_no'=> $order->no,//商户订单号
             'spbill_create_ip'=> $client_ip,
             'total_fee' => $order->total_amount * 100, //订单总金额（微信的单位是分）
@@ -65,17 +61,9 @@ class PaymentService
                 return $para_arr;
              }
 
-
          }
 
-         Log::error('调用微信统一下单API失败：',['response'=>$decryptedData]);
-         throw new \Exception('下单失败',500);
-
-        } catch (\Exception $e) {
-         $mesage = $e->getFile().' '.$e->getLine().' '.$e->getMessage();
-         Log::error($mesage);
-         throw new \Exception('服务器内部错误',500);
-     }
+         throw new \Exception('调用微信统一下单API失败：',500);
 
     }
 

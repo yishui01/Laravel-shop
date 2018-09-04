@@ -8,7 +8,6 @@ use App\Http\Requests\Request;
 use App\Models\Order;
 use App\Http\Requests\Admin\HandleRefundRequest;
 
-use App\Models\SocialInfo;
 use App\Models\User;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
@@ -85,7 +84,7 @@ class OrdersController extends Controller
             $grid->no('订单流水号');
             // 展示关联关系的字段时，使用 column 方法
             $grid->user_id('买家')->display(function ($value) use ($that){
-                return $that->getUserName($value, $this->user_type);
+                return $that->getUserName($value);
             });
             $grid->total_amount('总金额')->sortable();
             $grid->paid_at('支付时间')->sortable();
@@ -117,19 +116,9 @@ class OrdersController extends Controller
     }
 
     //获取下单的用户名
-    protected function getUserName($user_id, $user_type)
+    protected function getUserName($user_id)
     {
-        if ($user_type == 'users') {
-            $prefix = 'PC账号：';
-            return $prefix.User::select(\DB::raw('name'))->find($user_id)->name;
-        } else {
-            $prefix = '未知账号：';
-            switch ($user_type) {
-                case 'mini':
-                    $prefix = '小程序账号：';
-            }
-            return $prefix.SocialInfo::select(\DB::raw('nickname'))->find($user_id)->nickname;
-        }
+        return User::select(\DB::raw('name'))->find($user_id)->name;
     }
 
     /**
@@ -155,7 +144,7 @@ class OrdersController extends Controller
         return Admin::content(function (Content $content) use ($order, $that){
             $content->header('查看订单');
             //body方法可以接受laravel的视图作为参数
-            $username = $that->getUserName($order->user_id, $order->user_type);
+            $username = $that->getUserName($order->user_id);
             $content->body(view('admin.orders.show', ['order'=>$order, 'username'=>$username]));
         });
     }

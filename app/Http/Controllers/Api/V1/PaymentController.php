@@ -18,12 +18,20 @@ class PaymentController extends Controller
         $this->authorize('own', $order);
         // 订单已支付或者已关闭
         if ($order->paid_at || $order->closed) {
-            throw new InvalidRequestException('订单状态不正确');
+            return $this->response->error('订单状态不正确', $this->badcode_code);
         }
-        $social_info = $this->user();
+        $user = $this->user();
         $payment_service = new PaymentService();
-        $mini_need_param = $payment_service->miniPayByWechat($order, $social_info);
-        return $this->response->array($mini_need_param)->setStatusCode(201);
+        try{
+            $mini_need_param = $payment_service->miniPayByWechat($order, $user);
+        }catch (\Exception $e) {
+            if ($e->getCode() == 500) {
+                return $this->recordAndResponse($e, '生成小程序支付参数时失败：', '网络错误，请求失败');
+            } else {
+                return $this->response->error($e->getMessage(), $e->getCode());
+            }
+        }
+        return $this->response->array($mini_need_param)->setStatusCode($this->success_code);
     }
 
 }

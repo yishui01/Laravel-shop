@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Exceptions\InvalidRndomRulesException;
 use App\Http\Requests\Api\V1\MiniRegisterRequest;
 use App\Http\Requests\Api\V1\MiniLoginRequest;
 use App\Models\User;
@@ -20,26 +19,30 @@ class UsersController extends Controller
         try {
             $data = $miniProgram->auth->session($request->code); //返回openid
         } catch (\Exception $e) {
-            return $this->recordAndResponse($e, '通过code解析openid时抛出异常', '解析code失败');
+            return $this->recordAndResponse($e, '通过code解析openid时抛出异常',
+                '解析code失败');
         }
 
         if (isset($data['errcode'])) {
             return $this->badCodeResponse();
         }
         //查询该用户的openid或者unionid是否已经注册过
-        $user = $this->checkRegister($data['openid'], 'wx_mini', $data['unionid'] ?? 0);
+        $user = $this->checkRegister($data['openid'], 'wx_mini',
+            $data['unionid'] ?? 0);
         if (!$user) {
-            return $this->response->errorUnauthorized('用户未注册，请拉起授权页面提示用户授权');
+            return $this->response->error('用户未注册，请拉起授权页面提示用户授权',
+                $this->unauth_code);
         }
         //已经注册
         if ($user->status == 0) {
-            return $this->response->error('该用户已被禁用', 403);
+            return $this->response->error('该用户已被禁用', $this->forbidden_code);
         }
         try{
             $token = Auth::guard('api')->fromUser($user);
-            return $this->responseWithToken($token,$user)->setStatusCode(201);
+            return $this->responseWithToken($token,$user)->setStatusCode($this->success_code);
         } catch (\Exception $e) {
-            return $this->recordAndResponse($e, '发放token失败', '验证服务器错误');
+            return $this->recordAndResponse($e, '发放token失败',
+                '验证服务器错误');
         }
 
     }
@@ -51,7 +54,8 @@ class UsersController extends Controller
         try {
             $data = $miniProgram->auth->session($request->code); //返回openid
         } catch (\Exception $e) {
-            return $this->recordAndResponse($e, '通过code解析openid时抛出异常', '解析code失败');
+            return $this->recordAndResponse($e, '通过code解析openid时抛出异常',
+                '解析code失败');
         }
         // 如果结果错误，说明 code 已过期或不正确，返回 401 错误
         if (isset($data['errcode'])) {
@@ -59,7 +63,9 @@ class UsersController extends Controller
         }
         try{
             //解密数据->检查是否注册->?入库->返回token
-            $info = resolveMiniUserInfo($data['session_key'], $request->encryptedData, $request->iv);
+            $info = resolveMiniUserInfo($data['session_key'],
+                $request->encryptedData,
+                $request->iv);
             $info = json_decode($info);
             //看下这个openid或者unionid有没有被注册,如果已经注册了，直接返回，没有就注册再返回
             $user = $this->checkRegister($data['openid'], 'wx_mini', $data['unionid'] ?? 0);
@@ -76,7 +82,7 @@ class UsersController extends Controller
 
             try {
                 $token = Auth::guard('api')->fromUser($user);
-                return $this->responseWithToken($token,$user)->setStatusCode(201);
+                return $this->responseWithToken($token,$user)->setStatusCode($this->success_code);
             } catch (\Exception $e) {
                 return $this->recordAndResponse($e, '发放token失败', '验证服务器错误');
             }
@@ -96,11 +102,11 @@ class UsersController extends Controller
             }
         }catch (\Exception $e) {
             //token无效
-            $this->response->errorUnauthorized('token已经失效');
+            $this->response->error('token已经失效', $this->unauth_code);
         }
 
         return $this->response->item($user,new UserTransformer())
-            ->setStatusCode(201);
+            ->setStatusCode($this->success_code);
     }
 
     //查找第三方openid是否已经注册过了，注册了则返回user信息，否则返回null
@@ -150,17 +156,10 @@ class UsersController extends Controller
         ]);
     }
 
-    //捕获未定义异常时执行的函数
-    protected function recordAndResponse(\Exception $e, $log_message, $response_message)
-    {
-        Log::error($log_message,['msg'=>$e->getMessage().'\n'.$e->getFile().'\n'.$e->getLine()]);
-        return $this->response->error($response_message,'500');
-    }
-
     //无效code
     public function badCodeResponse()
     {
-        return $this->response->error('code不正确或者已过期', 402);
+        return $this->response->error('code不正确或者已过期', $this->servererr_code);
     }
 
 

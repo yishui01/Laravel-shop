@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\InvalidRequestException;
 use App\Models\Order;
-use App\Models\SocialInfo;
 use Illuminate\Http\Request;
 use App\Http\Requests\Api\V1\OrderRequest;
 use App\Services\OrderService;
@@ -29,31 +28,33 @@ class OrdersController extends Controller
 
         // 如果用户提交了优惠码
         if ($code = $request->input('coupon')) {
-            $coupon = CouponCode::where('code', $code)->first();
-            if (!$coupon) {
-                $this->response->error('优惠券不存在', 422);
-            }
+            $coupon = CouponCode::where([
+                ['code','=', $code],
+                ['enabled','=', 1],
+            ])->firstOrFail();
         }
         try {
             //dingoAPI不能触发laravel自定义异常的render方法吗，还要自己手动捕获才行，web端就可以触发异常自带的render方法啊
-            $order = $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon, 'mini');
+            $order = $orderService->store($user, $address, $request->input('remark'),
+                $request->input('items'), $coupon, 'mini');
         } catch (\Exception $e){
             if ($e->getCode() == 500) {
-                return $this->response->error('网络错误，下单失败', 500);
+                return $this->recordAndResponse($e, '下单错误：', '网络错误，下单失败');
             } else {
                 return $this->response->error($e->getMessage(), $e->getCode());
             }
         }
 
-        return $this->response->item($order, new OrderTransformer())->setStatusCode(201);
+        return $this->response->item($order, new OrderTransformer())
+            ->setStatusCode($this->success_code);
     }
 
     //订单列表页
     public function index(OrderService $orderService)
     {
-        //把PC端的订单和第三方的订单一起返回给用户
-        $social_user = $this->user();
-        $orders = $orderService->getAllOrders($social_user);
+
+        $user = $this->user();
+        $orders = $orderService->getAllOrders($user);
 
         //处理商品图片和订单状态
         foreach ($orders as &$order)
@@ -65,20 +66,22 @@ class OrdersController extends Controller
             //放入订单状态字段，方便前端筛选
             $order['status'] = $this->setStatus($order);
         }
-        return $this->response->collection($orders, new OrderTransformer())->setStatusCode(201);
+        return $this->response->collection($orders, new OrderTransformer())
+            ->setStatusCode($this->success_code);
 
     }
 
     //订单详情
     public function show(Order $order)
     {
-        $order_info = $order->with(['items.productSku', 'items.product'])->find($order->id);
+        $order_info = $order->with(['items.productSku', 'items.product'])->findOrFail($order->id);
         foreach ($order_info['items'] as &$item) {
             //拼接图片地址
             $item->product->fullImage = $item->product->fullImage;
         }
         $order_info['status'] = $this->setStatus($order_info);
-        return $this->response->item($order_info, new OrderTransformer())->setStatusCode(201);
+        return $this->response->item($order_info, new OrderTransformer())
+            ->setStatusCode($this->success_code);
     }
 
     //判断当前订单状态，返回给前端方便筛选

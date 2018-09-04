@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\Api\V1\UserAddressRequest;
 use App\Models\Product;
-use App\Models\SocialInfo;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Transformers\UserAddressTransformer;
@@ -15,20 +14,21 @@ class UserAddressesController extends Controller
     //返回用户收货地址列表
     public function index()
     {
-        $social_user = $this->user(); //根据token解析出对应的用户
-        //var_dump($titles = Product::pluck('键值','键名')->toArray());
-        $builder = create_relation_builder($social_user, 'UserAddress');
-        $address = $builder->orderBy('last_used_at', 'desc')->get();
+        $user = $this->user(); //根据token解析出对应的用户
+        $address = UserAddress::where('user_id', $user->id)
+            ->orderBy('last_used_at', 'desc')->get();
         foreach ($address as &$v) {
             $v->full_address = $v->FullAddress;
         }
-        return $this->response->collection($address, new UserAddressTransformer())->setStatusCode(201);
+        return $this->response->collection($address, new UserAddressTransformer())
+            ->setStatusCode($this->success_code);
     }
 
     //收货地址详情
     public function show(UserAddress $user_address)
     {
-        return $this->response->item($user_address, new UserAddressTransformer())->setStatusCode(201);
+        return $this->response->item($user_address, new UserAddressTransformer())
+            ->setStatusCode($this->success_code);
     }
 
     //添加收货地址接口
@@ -38,9 +38,9 @@ class UserAddressesController extends Controller
         $user_address = new UserAddress();
         $user_address->fill($request->all());
         $user_address->user_id = $user->id;
-        $user_address->user_type = 'mini';
         $user_address->save();
-        return $this->response->item($user_address, new UserAddressTransformer())->setStatusCode(201);
+        return $this->response->item($user_address, new UserAddressTransformer())
+            ->setStatusCode($this->success_code);
     }
 
     //修改收货地址接口
@@ -56,7 +56,7 @@ class UserAddressesController extends Controller
             'contact_name',
             'contact_phone',
         ]));
-        return $this->response->noContent()->setStatusCode(201);
+        return $this->response->noContent()->setStatusCode($this->success_code);
     }
 
     //删除收货地址
@@ -64,6 +64,6 @@ class UserAddressesController extends Controller
     {
         $this->authorize('update', $user_address);
         $user_address->delete();
-        return $this->response->noContent()->setStatusCode(201);
+        return $this->response->noContent()->setStatusCode($this->success_code);
     }
 }

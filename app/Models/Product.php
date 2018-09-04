@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\CouponCodeUnavailableException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Exceptions\InvalidRequestException;
@@ -60,7 +61,7 @@ class Product extends Model
         //可选属性
         $select_attr = $this->pro_attr()->with('attribute')
             ->where('hasMany', '1')->get()->toArray();
-        if (!count($skus))  throw new InvalidRequestException('该商品没有库存啦');
+        if (!count($skus))  throw new CouponCodeUnavailableException('该商品没有库存啦');
         return [
             'select_attr'=>$select_attr,
             'skus' => $skus,

@@ -26,7 +26,8 @@ class CouponCodesController extends Controller
             //过滤掉库存不足的优惠券
             if ($v['used'] >= $v['total'])unset($data[$k]);
         }
-        return $this->response->collection($data, new CouponCodeTransformer())->setStatusCode(201);
+        return $this->response->collection($data, new CouponCodeTransformer())
+            ->setStatusCode($this->success_code);
     }
 
     //用户领取优惠券接口
@@ -38,14 +39,14 @@ class CouponCodesController extends Controller
         ])->firstOrFail();
 
         if (($couponCode->total - $couponCode->used)  <= 0) {
-            return $this->response->error('该优惠券已经发放完毕啦',421);
+            return $this->response->error('该优惠券已经发放完毕啦',$this->forbidden_code);
         }
 
         //判断当前用户是否已经使用过该优惠券，如果没有使用过就可以领取
         //领取结果并不会保存在数据库，只会返回201，小程序收到201之后缓存优惠券在本地，
         //下单时带上优惠券，下单接口会判断优惠券是否有效
         $user = $this->user(); //当前已登陆的用户
-        $builder = create_relation_builder($user, 'Order'); //所有关联账号下的订单
+        $builder = Order::query()->where('user_id', $user->id);
         $is_used = $builder->where(function ($query){
             $query->where(function ($query){
                 $query->whereNull('paid_at')
@@ -58,8 +59,9 @@ class CouponCodesController extends Controller
 
         if ($is_used) {
             //如果存在，那就是已经使用过优惠券了
-            return $this->response->error('您已经使用过这张优惠券了',421);
+            return $this->response->error('您已经使用过这张优惠券了',$this->forbidden_code);
         }
-        return $this->response->item($couponCode, new CouponCodeTransformer())->setStatusCode(201);
+        return $this->response->item($couponCode, new CouponCodeTransformer())
+            ->setStatusCode($this->success_code);
     }
 }

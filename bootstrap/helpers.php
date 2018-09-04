@@ -63,60 +63,6 @@ function resolveMiniUserInfo($session_key, $encryptedData, $iv)
     return $result;
 }
 
-//组建一个获取用户某个表所有数据的查询构造器
-function create_relation_builder($user, $data_model_name)
-{
-    if(!class_exists($data_model_name)) {
-        //自动补全模型名称
-        $data_model_name = '\App\Models\\'.$data_model_name;
-    }
-    $builder = $data_model_name::query();
-    if ($user instanceof \App\Models\User) {
-        //传递的是PC端的账号模型，找出所有绑定了这个账号的第三方账号，合并返回
-        $all_user = \App\Models\SocialInfo::where('user_id', $user->id)->pluck('type', 'id');
-        $builder->where(function ($query) use ($user, $all_user){
-            $query->where([ //PC账号的
-                ['user_id', '=', $user->id],
-                ['user_type', '=', 'users']
-            ]);
-            foreach ($all_user as $id => $user_type) { //所有第三方账号的
-                $query->orWhere([
-                    ['user_id', '=', $id],
-                    ['user_type', '=', $user_type]
-                ]);
-            }
-        });
-
-    } else if($user instanceof \App\Models\SocialInfo) {
-        //传递的是第三方表的用户模型，先看有没有绑定PC端的账号，绑定了那就查出所有第三方账号与PC端账号的数据合并返回
-        if ($user->user_id) {
-            //如果绑定了PC端的账号,把所有的订单全部查出来返回
-            $all_user = \App\Models\SocialInfo::where('user_id', $user->user_id)->pluck('type', 'id');
-            $builder->where(function ($query) use ($user, $all_user){
-                $query->where([ //PC账号的
-                    ['user_id', '=', $user->id],
-                    ['user_type', '=', 'users']
-                ]);
-                foreach ($all_user as $id => $user_type) {
-                    $query->orWhere([ //所有第三方账号的
-                            ['user_id', '=', $id],
-                            ['user_type', '=', $user_type]
-                    ]);
-                }
-            });
-        } else {
-            $builder->where([
-                ['user_id', '=', $user->id],
-                ['user_type', '=', $user->type]
-            ]);
-        }
-    } else {
-        \Illuminate\Support\Facades\Log::error('user模型传递错误',['user'=>$user]);
-        throw new Exception('User模型错误');
-    }
-
-    return $builder;
-}
 
 //获取客户端IP
 function get_client_ip(){
