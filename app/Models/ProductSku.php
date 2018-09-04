@@ -13,6 +13,13 @@ class ProductSku extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function setDescriptionAttribute($val)
+    {
+        if (empty($val)) {
+            $this->attributes['description'] = '';
+        }
+    }
+
     public function decreaseStock($amount)
     {
         if ($amount < 0) {

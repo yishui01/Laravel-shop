@@ -105,7 +105,7 @@
         var count = {{count($select_attr)}};
         var check_count = 0; //已经选择的属性数量
         @foreach($skus as $sku)
-        sku_arr.push({'key':"{{$sku->attributes}}", 'val':{price:{{$sku->price}},stock:{{$sku->stock}}, id:{{$sku->id}}} });
+        sku_arr.push({'key':"{{$sku->attributes}}", 'val':{price:"{{$sku->price}}",stock:{{$sku->stock}}, id:{{$sku->id}}} });
         @endforeach
 
         function click_attr(self) {

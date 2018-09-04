@@ -18,7 +18,7 @@ class PaymentController extends Controller
         $this->authorize('own', $order);
         // 订单已支付或者已关闭
         if ($order->paid_at || $order->closed) {
-            return $this->response->error('订单状态不正确', $this->badcode_code);
+            return $this->response->error('订单状态不正确', $this->forbidden_code);
         }
         $user = $this->user();
         $payment_service = new PaymentService();
