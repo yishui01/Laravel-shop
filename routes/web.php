@@ -17,13 +17,14 @@ Route::redirect('/', '/products')->name('root');
 
 //用户登录注册
 Auth::routes();
-Route::get('alipay', function() {
-    return app('alipay')->web([
-        'out_trade_no' => time(),
-        'total_amount' => '1',
-        'subject' => 'test subject - 测试',
-    ]);
-});
+
+//重写用户登录注册
+$this->get('register', 'Auth\RegisterController@showPart1')->name('register');
+$this->post('checkCaptcha', 'Auth\RegisterController@sendSms')->name('register.checkCaptcha');
+$this->get('register2', 'Auth\RegisterController@showPart2')->name('register2');
+$this->post('register3', 'Auth\RegisterController@showPart3')->name('register3');
+
+
 Route::group(['middleware' => 'auth'], function() {
     //未验证邮箱的重定向页面
     Route::get('/email_verify_notice', 'PagesController@emailVerifyNotice')->name('email_verify_notice');
@@ -31,7 +32,6 @@ Route::group(['middleware' => 'auth'], function() {
     Route::get('/email_verification/send', 'EmailVerificationController@send')->name('email_verification.send');
     //验证邮箱页面
     Route::get('/email_verification/verify', 'EmailVerificationController@verify')->name('email_verification.verify');
-
     //开始
     Route::group(['middleware' => 'email_verified'], function() {
         //这里的路由加入了验证邮箱中间件，必须要验证邮箱才可访问
@@ -74,6 +74,7 @@ Route::group(['middleware' => 'auth'], function() {
     });
     // 结束
 });
+
 
 //支付宝扫码服务端回调
 Route::post('payment/alipay/notify', 'PaymentController@alipayNotify')->name('payment.alipay.notify');
