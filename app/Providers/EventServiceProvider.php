@@ -23,7 +23,7 @@ class EventServiceProvider extends ServiceProvider
             'App\Listeners\EventListener',
         ],
         Registered::class => [
-            RegisteredListener::class,
+            RegisteredListener::class, //用户邮箱注册时发送注册邮件
         ],
         OrderPaid::class => [
             UpdateProductSoldCount::class, //更新商品销量
