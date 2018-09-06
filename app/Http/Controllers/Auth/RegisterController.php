@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Services\CaptchaService;
 use App\Services\SmsService;
+use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -116,8 +117,7 @@ class RegisterController extends Controller
             Log::error($err_log);
             throw new SystemException('发送短信错误');
         }
-        return redirect()->route('register2',['key'=>$key_and_expire['key'], 'phone'=>$request->phone])
-            ->with('success', '短信验证码发送成功！');
+        return redirect()->route('register2',['key'=>$key_and_expire['key'], 'phone'=>$request->phone]);
     }
 
     //显示用户信息表单

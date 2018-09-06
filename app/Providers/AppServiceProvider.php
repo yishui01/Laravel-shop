@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Models\ProductSku;
+use App\Models\User;
 use App\Observer\ProductSkuObserver;
+use App\Observer\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Monolog\Logger;
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
         ProductSku::observe(ProductSkuObserver::class);
+        User::observe(UserObserver::class);
     }
 
     /**

@@ -45,4 +45,12 @@ class OrderRequest extends Request
 
         ];
     }
+
+    public function attributes()
+    {
+        return [
+            'address_id' => '用户收货地址',
+            'items'      => '所选商品'
+        ];
+    }
 }
