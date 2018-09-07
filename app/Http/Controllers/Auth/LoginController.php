@@ -47,8 +47,12 @@ class LoginController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
+        if (strpos(url()->previous(), '/login') === false) {
+            //不包含/login字符串的才加入到session，用于登录后重定向到之前的目的页面
+            session(['url.intended' => url()->previous()]);
+        }
         return view('auth.login');
     }
 
@@ -109,8 +113,8 @@ class LoginController extends Controller
         $identify[$key] = $request->username;
         $identify['password'] = $request->password;
         return $this->guard()->attempt(
-            //如果要实现email或者手机号+密码的方式登录，那么这里的credentials数组要传不同的键名，email或者phone
-            //这一步是登录的关键，验证+创建session都在这里了，这方法在sessionguard.php中
+        //如果要实现email或者手机号+密码的方式登录，那么这里的credentials数组要传不同的键名，email或者phone
+        //这一步是登录的关键，验证+创建session都在这里了，这方法在sessionguard.php中
             $identify, $request->filled('remember')
         );
     }
@@ -134,12 +138,14 @@ class LoginController extends Controller
      */
     protected function sendLoginResponse(Request $request)
     {
+
         $request->session()->regenerate();
 
         $this->clearLoginAttempts($request);
 
         return $this->authenticated($request, $this->guard()->user())
             ?: redirect()->intended($this->redirectPath());
+
     }
 
     /**
@@ -151,7 +157,7 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
-        //
+
     }
 
     /**

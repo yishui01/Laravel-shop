@@ -61,7 +61,6 @@ class ProductSkusController extends Controller
                 ->get();
         }
 
-
         return Admin::content(function (Content $content) use ($sku, $attributes) {
             $content->header('修改库存');
             $products = $this->getProduct();

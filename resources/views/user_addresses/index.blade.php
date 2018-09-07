@@ -7,6 +7,11 @@
             <div class="panel panel-default">
                 <div class="panel-heading">收货地址列表</div>
                 <div class="panel-body">
+
+                        <a class="btn btn-success" style="margin-bottom: 20px;" href="{{ route('user_addresses.create')}}">
+                            添加收货地址
+                        </a>
+
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>

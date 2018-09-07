@@ -37,7 +37,7 @@ Route::prefix('sms')->group(function () {
         ->name('sms.password.reset'); //更新用户新密码
 });
 
-Route::group(['middleware' => 'auth'], function() {
+Route::group(['middleware' => ['auth']], function() {
     //未验证邮箱的重定向页面
     Route::get('/email_verify_notice', 'PagesController@emailVerifyNotice')->name('email_verify_notice');
     //手动发送验证以邮件页面

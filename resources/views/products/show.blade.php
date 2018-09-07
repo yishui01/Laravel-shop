@@ -50,7 +50,9 @@
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="product-detail-tab">
                                 @foreach($unique_attr as $k=>$v)
-                                    {{$v->name}}：{{$v->val}}
+                                    <span style="width: 30%;display: inline-block;">
+                                        {{$v->name}}：{{$v->val}}
+                                    </span>
                                     @endforeach
                                 <hr />
                                 {!! $product->description !!}

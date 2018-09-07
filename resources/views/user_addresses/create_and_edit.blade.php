@@ -29,6 +29,7 @@
                                 {{ method_field('PUT') }}
                                 @else
                                     <form class="form-horizontal" role="form" action="{{ route('user_addresses.store') }}" method="post">
+                                        <input type="hidden" name="cart" value="{{$cart ?? 0}}">
                                 @endif                            <!-- 引入 csrf token 字段 -->
                         {{ csrf_field() }}
                         <!-- 注意这里多了 @change -->

@@ -147,11 +147,6 @@ class ProductsController extends Controller
                     ->options(['1' => '可选', '0'=> '唯一'])->default('1')->rules('required');
                 $form->text('val', '属性值')->placeholder('当属性为唯一时填写该项，可选属性不用填写该项');
             });
-            // 定义事件回调，当模型即将保存时会触发这个回调,找出最低的价格，存到商品表
-            $form->saving(function (Form $form) {
-                $form->model()->price = 0;
-                //$form->model()->price = collect($form->input('skus'))->where(Form::REMOVE_FLAG_NAME, 0)->min('price');
-            });
 
         });
     }

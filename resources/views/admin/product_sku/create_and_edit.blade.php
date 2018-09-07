@@ -33,7 +33,7 @@
                             <option value=""></option>
                             @foreach($products as $item)
                                 <option value="{{$item->id}}"
-                                @if($sku->product_id === $item->id)
+                                @if($sku->product_id == $item->id)
                                 selected="selected"
                                  @endif
                                 >{{$item->text}}</option>

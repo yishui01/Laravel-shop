@@ -16,9 +16,9 @@ class UserAddressesController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('user_addresses.create_and_edit', ['address' => new UserAddress()]);
+        return view('user_addresses.create_and_edit', ['address' => new UserAddress(), 'cart'=>$request->cart]);
     }
 
     public function store(UserAddressRequest $request)
@@ -27,7 +27,11 @@ class UserAddressesController extends Controller
         $user_address->fill($request->all());
         $user_address->user_id = Auth::id();
         $user_address->save();
-        return redirect()->route('user_addresses.index')->with('success', '地址添加成功！');
+        $route_name = 'user_addresses.index';
+        if ($request->cart) {
+            $route_name = 'cart.index';
+        }
+        return redirect()->route($route_name)->with('success', '地址添加成功！');
     }
 
     public function edit(UserAddress $user_address)
