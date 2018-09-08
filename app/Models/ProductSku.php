@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\SystemException;
 class ProductSku extends Model
 {
-    protected $fillable = ['title', 'description', 'price', 'stock','product_id'];
+    protected $fillable = ['title', 'description', 'price', 'stock','product_id','attributes'];
 
     public function product()
     {
