@@ -11,6 +11,6 @@ class CouponCodesSeeder extends Seeder
      */
     public function run()
     {
-        factory(\App\Models\CouponCode::class, 20)->create();
+        factory(\App\Models\CouponCode::class, 10)->create();
     }
 }

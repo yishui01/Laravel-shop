@@ -23,6 +23,7 @@ class OrderTransformer extends TransformerAbstract
             'ship_data'       => $order->ship_data,
             'total_amount'    => $order->total_amount,
             'items'           => $order->items,
+            'closed'           => $order->closed,
             'status'          => $order->status  //这个字段是额外加的用于前端筛选，数据库中并没有这个字段
         ];
     }

@@ -15,9 +15,10 @@ class CreateBannersTable extends Migration
     {
         Schema::create('banners', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('place', 20)->default('mini-index');
+            $table->string('place', 20)->default('mini-index')
+                ->comment('mini-index为小程序首页轮播，pc-index为pc首页轮播');
             $table->string('type', 20)->default('A')->comment('A为内部商品链接，B为外部链接');
-            $table->unsignedInteger('product_id')->default(0)->comment('type为B时，跳转的商品ID');
+            $table->unsignedInteger('product_id')->default(0)->comment('type为A时，跳转的商品ID');
             $table->string('url', 300);
             $table->string('title', 50)->nullable();
             $table->string('link', 300)->nullable();

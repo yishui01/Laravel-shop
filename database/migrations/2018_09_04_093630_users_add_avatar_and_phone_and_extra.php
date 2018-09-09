@@ -14,7 +14,7 @@ class UsersAddAvatarAndPhoneAndExtra extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('avatar')->nullable();
+            $table->string('avatar', 1000)->nullable();
             $table->string('phone')->nullable();
             $table->text('extra')->nullable();
             $table->char('status')->default(1)->comment('1为正常用户，0为已禁用');

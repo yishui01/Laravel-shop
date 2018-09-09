@@ -15,7 +15,7 @@ class OrderPolicy
     //验证这个订单是否是当前用户的
     public function own(User $user, Order $order)
     {
-       return $order->user_id === $user->id;
+        return $order->user_id == $user->id;
     }
 
 }

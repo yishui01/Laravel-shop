@@ -125,4 +125,16 @@ class OrdersController extends Controller
 
         return $status;
     }
+
+    //删除订单
+    public function destroy(Order $order)
+    {
+        $this->authorize('own', $order);
+        if ($order->paid_at || $order->closed) {
+            return $this->response->error('订单状态不正确', 403);
+        }
+        $order->closed = 1;
+        $order->save();
+        return $this->response->noContent()->setStatusCode(201);
+    }
 }

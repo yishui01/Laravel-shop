@@ -6,7 +6,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\UserAddress;
 use App\Models\Product;
-class User extends Authenticatable
+use Tymon\JWTAuth\Contracts\JWTSubject;
+
+class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
 
@@ -55,5 +57,16 @@ class User extends Authenticatable
     public function productSku()
     {
         return $this->hasMany(ProductSku::class);
+    }
+
+
+    public function getJWTCustomClaims()
+    {
+       return [];
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
     }
 }

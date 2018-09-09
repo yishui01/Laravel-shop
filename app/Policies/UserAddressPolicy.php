@@ -13,7 +13,7 @@ class UserAddressPolicy
     //验证这个收货地址是否是当前用户的
     public function update(User $currentUser, UserAddress $userAddress)
     {
-        return $currentUser->id === $userAddress->user_id;
+        return $currentUser->id == $userAddress->user_id;
     }
 
 }

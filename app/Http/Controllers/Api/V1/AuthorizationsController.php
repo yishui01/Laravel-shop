@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Requests\Api\V1\MiniRegisterRequest;
 use App\Http\Requests\Api\V1\MiniLoginRequest;
@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class UsersController extends Controller
+class AuthorizationsController extends Controller
 {
     //小程序登录，成功返回201，其他均为失败
     public function miniLogin(MiniLoginRequest $request)
@@ -74,9 +74,11 @@ class UsersController extends Controller
                 $user = User::create([
                     'wx_mini_openid'  => $info->openId,
                     'wx_unionid'      => $info->unionId ?? null,
-                    'avatar'         => $info->avatarUrl,
+                    'avatar'          => $info->avatarUrl,
                     'name'            => $info->nickName,
                     'extra'           => json_encode($info),
+                    'email'           => '',
+                    'password'       => ''
                 ]);
             }
 
@@ -147,10 +149,9 @@ class UsersController extends Controller
             'access_token'=> $token,
             'token_type'  => 'Bearer',
             'user'        => [
-                'id'            => $user->id,
                 'name'          => $user->name,
                 'email'         => $user->email,
-                'headimg'       => $user->avatar,
+                'avatar'       => $user->avatar,
                 'phone'         => $user->phone,
                 ]
         ]);

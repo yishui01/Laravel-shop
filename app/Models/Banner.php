@@ -18,5 +18,6 @@ class Banner extends Model
         if (strpos($value, 'http') === false) {
             return env('APP_URL').'/uploads/'.$value;
         }
+        return $value;
     }
 }
