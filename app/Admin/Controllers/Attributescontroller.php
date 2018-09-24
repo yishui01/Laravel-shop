@@ -15,7 +15,7 @@ use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
 use function foo\func;
 
-class Attributescontroller extends Controller
+class AttributesController extends Controller
 {
     use ModelForm;
 
