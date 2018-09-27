@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Exceptions\InvalidRequestException;
 use App\Models\ProductSku;
 use App\Models\User;
 use App\Observer\ProductSkuObserver;
 use App\Observer\UserObserver;
+use Encore\Admin\Facades\Admin;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Monolog\Logger;
@@ -22,6 +24,13 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         ProductSku::observe(ProductSkuObserver::class);
         User::observe(UserObserver::class);
+        \Horizon::auth(function ($request) {
+            if(Admin::user() && Admin::user()->isAdministrator()){
+                return true;
+            }
+            throw new InvalidRequestException('老哥，这个就别看了吧');
+            return false;
+        });
     }
 
     /**
