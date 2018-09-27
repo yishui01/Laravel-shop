@@ -24,13 +24,16 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         ProductSku::observe(ProductSkuObserver::class);
         User::observe(UserObserver::class);
-        \Horizon::auth(function ($request) {
-            if(Admin::user() && Admin::user()->isAdministrator()){
-                return true;
-            }
-            throw new InvalidRequestException('老哥，这个就别看了吧');
-            return false;
-        });
+        if(!strtoupper(substr(PHP_OS,0,3) == 'WIN') && class_exists('\Horizon')) {
+            \Horizon::auth(function ($request) {
+                if(Admin::user() && Admin::user()->isAdministrator()){
+                    return true;
+                }
+                throw new InvalidRequestException('老哥，这个就别看了吧');
+                return false;
+            });
+        }
+
     }
 
     /**
