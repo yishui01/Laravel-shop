@@ -41,6 +41,16 @@
 - 小程序端提供微信支付
 - 前台提供用户申请退款接口、后台审核是否同意退款
 
+## 安装方法
+- 1、git clone或者下载解压到本地
+- 2、将public设置为网站根目录
+- 3、composer install
+- 4、npm install
+- 5、npm run production
+- 6、配置env数据库，运行php artisan migrate
+- 7、导入后台管理数据，admin.sql (导入后http://域名/admin 进入后台登录，管理员账号为admin 密码为 admin)
+
+
 
 
 
