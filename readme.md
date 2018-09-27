@@ -49,8 +49,7 @@
 - 5、npm run production
 - 6、配置env数据库，运行php artisan migrate
 - 7、导入后台管理数据，admin.sql (导入后http://域名/admin 进入后台登录，管理员账号为admin 密码为 admin)
-
-
+- 提示:APP_DEBUG为true时，注册时的短信验证码不会发送，固定为1234
 
 
 
