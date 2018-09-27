@@ -23,7 +23,6 @@ Route::get('register', 'Auth\RegisterController@showPart1')->name('register');
 Route::post('checkCaptcha', 'Auth\RegisterController@sendSms')->name('register.checkCaptcha');
 Route::get('register2', 'Auth\RegisterController@showPart2')->name('register2');
 Route::post('register3', 'Auth\RegisterController@showPart3')->name('register3');
-Route::post('register3', 'Auth\RegisterController@showPart3')->name('register3');
 
 //重写忘记密码为手机短信验证,并且保留原来的邮箱找回逻辑和路由
 Route::prefix('sms')->group(function () {
