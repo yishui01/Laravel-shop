@@ -1,6 +1,6 @@
 ## laravel shop 购物商城项目 
 本项目基于Laravel-china教程5《电商实战》，在此基础上进行扩展开发
-<br /><br />线上demo：https://shop.wuxxin.com
+<br /><br />[线上demo](https://shop.wuxxin.com?_blank)
 ## 扩展内容
 1、用户模块
 - 支持手机号注册、登录、找回密码（腾讯云验证码和短信发送）
