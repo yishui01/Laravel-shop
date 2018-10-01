@@ -63,6 +63,8 @@ class ProductsController extends Controller
                 'search' => $search,
                 'order'  => $order,
             ],
+            // 这个已经用viewcomposer自动注入了
+            //// 'categoryTree' => isset($category) ? $category->getTree() : (new Category())->getTree(),
         ]);
     }
 

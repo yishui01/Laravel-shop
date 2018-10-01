@@ -119,9 +119,12 @@ class Category extends Model
      * @param int $obj
      * @return array
      */
-    public function getTree($parentid = 0)
+    public function getTree($parentid = 0, $data = null)
     {
-        $data = Category::all()->toArray();
+        if (is_null($data)) {
+            //筛选出显示的分类
+            $data = Category::show()->get()->toArray();
+        }
         $a = 0;
         return $this->_getTree($data,$parentid, $a, true);
 
@@ -130,6 +133,11 @@ class Category extends Model
     private function _getTree($data, $parentid, &$obj = 0, $refresh = false)
     {
         static $res = [];
+
+        if($refresh){
+            $res = [];
+        }
+
         foreach ($data as $k=>&$v)
         {
             if ($v['parent_id'] == $parentid) {
@@ -140,7 +148,6 @@ class Category extends Model
                     $this->_getTree($data, $v['id'], $v);
                     $obj['children'][] = $v;
                 }
-
             }
         }
         return $res;
