@@ -9,15 +9,15 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use App\Models\Category;
 class ProductsController extends Controller
 {
     public function index(Request $request)
     {
-        // 创建一个查询构造器
+        // 创建一个查询构造器，只放出已上架以及设置了sku的商品
         $builder = Product::query()->has('skus', '>=', 1)
             ->where('on_sale', true);
-        // 判断是否有提交 search 参数，如果有就赋值给 $search 变量
+
         // search 参数用来模糊搜索商品
         if ($search = $request->input('search', '')) {
             $like = '%'.$search.'%';
@@ -32,7 +32,16 @@ class ProductsController extends Controller
             });
         }
 
-        // 是否有提交 order 参数，如果有就赋值给 $order 变量
+        // 如果有传入 category_id 字段，并且在数据库中有对应的类目
+        if ($request->input('category_id') && $category = Category::find($request->input('category_id'))) {
+            //找出这个分类的所有子类目的 id数组
+            $children_id_arr = $category->all_children_id;
+            //把自身的id也加进去
+            array_push($children_id_arr, $category->id);
+            //whereIn找出所有的商品
+            $builder->whereIn('category_id', $children_id_arr);
+        }
+
         // order 参数用来控制商品的排序规则
         if ($order = $request->input('order', '')) {
             // 是否是以 _asc 或者 _desc 结尾
@@ -49,6 +58,7 @@ class ProductsController extends Controller
 
         return view('products.index', [
             'products' => $products,
+            'category' => $category ?? null,
             'filters'  => [
                 'search' => $search,
                 'order'  => $order,

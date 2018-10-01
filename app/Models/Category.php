@@ -40,6 +40,14 @@ class Category extends Model
             ->get();
     }
 
+    //获取所有子类目id，返回数组
+    public function getAllChildrenIdAttribute()
+    {
+        return Category::query()
+            ->where('path', 'like', $this->path.$this->id.'-%')
+            ->pluck('id')->toArray();
+    }
+
     //获取商品全名（祖先1-祖先2-...-商品本身名）
     public function getFullNameAttribute()
     {

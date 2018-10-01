@@ -75,7 +75,7 @@ class CategoriesController extends Controller
             $grid->id('ID')->sortable();
             $grid->name('分类名称');
             $grid->path('path');
-            $grid->score('排序权重');
+            $grid->level('层级');
             $grid->isshow('是否显示')->display(function ($isshow){
                 return $isshow == 'A' ? '是' : '否';
             });
@@ -91,6 +91,7 @@ class CategoriesController extends Controller
                     }
                 }
             });
+            $grid->score('排序权重');
             $grid->created_at();
             $grid->updated_at();
         });
