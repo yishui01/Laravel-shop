@@ -44,4 +44,6 @@ Route::group([
     $router->resource('banners', 'BannersController');
     //站点管理
     $router->resource('web_infos', 'WebInfosController');
+    //众筹商品
+    $router->resource('crowdfunding_products', 'CrowdfundingProductsController');
 });

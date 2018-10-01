@@ -75,8 +75,7 @@ class ProductsController extends Controller
     {
 
         return Admin::grid(Product::class, function (Grid $grid) {
-
-            $grid->model()->orderBy('id', 'desc');
+            $grid->model()->where('type',Product::TYPE_NORMAL)->orderBy('id', 'desc');
             $grid->id('ID')->sortable();
 
             $grid->title('商品名称');
@@ -148,6 +147,11 @@ class ProductsController extends Controller
             });
 
         });
+    }
+
+    public function store()
+    {
+        return $this->form()->store();
     }
 
 
