@@ -74,6 +74,7 @@ class CategoriesController extends Controller
         return Admin::grid(Category::class, function (Grid $grid) {
             $grid->id('ID')->sortable();
             $grid->name('分类名称');
+            $grid->path('path');
             $grid->score('排序权重');
             $grid->isshow('是否显示')->display(function ($isshow){
                 return $isshow == 'A' ? '是' : '否';
@@ -114,6 +115,7 @@ class CategoriesController extends Controller
             $form->display('id', 'ID');
             $form->select('parent_id', '上级分类')->options($options)->default($parent_id);
             $form->text('name','分类名称');
+
             $form->text('score','排序分值')->default(0);
             $form->radio('isshow', '是否显示')->options(['A'=>'显示','B'=>'不显示'])->default('B');
             $form->display('created_at', 'Created At');

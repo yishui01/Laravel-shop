@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Exceptions\InvalidRequestException;
+use App\Models\Category;
 use App\Models\ProductSku;
 use App\Models\User;
+use App\Observer\CategoryObserver;
 use App\Observer\ProductSkuObserver;
 use App\Observer\UserObserver;
 use Encore\Admin\Facades\Admin;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         ProductSku::observe(ProductSkuObserver::class);
         User::observe(UserObserver::class);
+        Category::observe(CategoryObserver::class);
         if(!strtoupper(substr(PHP_OS,0,3) == 'WIN') && class_exists('\Horizon')) {
             \Horizon::auth(function ($request) {
                 if(Admin::user() && Admin::user()->isAdministrator()){

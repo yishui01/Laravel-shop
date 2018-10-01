@@ -7,11 +7,54 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 class Category extends Model
 {
-    public $fillable = ['name','score','parent_id','isshow'];
+    public $fillable = ['name','score','parent_id','isshow', 'is_directory', 'path', 'level'];
+
     public function product()
     {
         $this->hasMany(Product::class);
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    //获取所有祖先类目的ID值
+    public function getPathIdsAttribute()
+    {
+        //去除两端的 '-', 再打断成数组，再取出空值
+        return array_filter(explode('-', trim($this->path, '-')));
+    }
+
+    //获取所有祖先类目并按层级排序
+    public function getAncestorsAttribute()
+    {
+        return Category::query()
+            ->whereIn('id', $this->path_ids)
+            ->orderBy('level', 'asc')
+            ->get();
+    }
+
+    //获取商品全名（祖先1-祖先2-...-商品本身名）
+    public function getFullNameAttribute()
+    {
+        return $this->ancestors
+            ->pluck('name')
+            ->push($this->name)
+            ->implode(' — ');
+    }
+
+    //显示已经启用的类目
+    public function scopeShow($query)
+    {
+        return $query->where('isshow', '=', 'A');
+    }
+
 
     /**获取所有的分类列表
      * @param bool $islevel 是否返回层级标志
@@ -122,10 +165,7 @@ class Category extends Model
         return $res;
     }
 
-    public function scopeShow($query)
-    {
-        return $query->where('isshow', '=', 'A');
-    }
+
 
 
 }

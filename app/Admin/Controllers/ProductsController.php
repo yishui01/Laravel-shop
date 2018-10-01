@@ -117,18 +117,17 @@ class ProductsController extends Controller
      */
     protected function form($id = 0)
     {
-        $category = new Category();
-        $options_data = $category->getCateList(0,0);
+        $options_data = Category::all();
         $options = [];
         foreach ($options_data as $k => $v) {
-            $options[$v['id']] = $v['text'];
+            $options[$v['id']] = $v->full_name;
         }
         $category_id = (int)($id ? Product::find($id)->category_id : 0);
         return Admin::form(Product::class, function (Form $form)  use ($options, $category_id){
-
             // 创建一个输入框，第一个参数 title 是模型的字段名，第二个参数是该字段描述
             $form->text('title', '商品名称')->rules('required');
-            $form->select('category_id', '商品分类')->options($options)->default($category_id)->rules('required');
+            $form->select('category_id', '商品分类')
+                ->options($options)->default($category_id)->rules('required');
 
             // 创建一个选择图片的框
             $form->image('image', '封面图片')->rules('required|image');
