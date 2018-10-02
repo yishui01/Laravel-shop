@@ -85,6 +85,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('payment/{order}/installment', 'PaymentController@payByInstallment')->name('payment.installment');
     //分期付款列表
     Route::get('installments', 'InstallmentsController@index')->name('installments.index');
+    //分期付款详情页
+    Route::get('installments/{installment}', 'InstallmentsController@show')->name('installments.show');
 });
 
 
