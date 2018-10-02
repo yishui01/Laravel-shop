@@ -83,6 +83,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('crowdfunding_orders', 'OrdersController@crowdfunding')->name('crowdfunding_orders.store');
     //创建分期付款
     Route::post('payment/{order}/installment', 'PaymentController@payByInstallment')->name('payment.installment');
+    //分期付款列表
+    Route::get('installments', 'InstallmentsController@index')->name('installments.index');
 });
 
 
