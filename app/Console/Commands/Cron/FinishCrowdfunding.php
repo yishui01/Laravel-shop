@@ -7,6 +7,7 @@ use App\Models\CrowdfundingProduct;
 use App\Services\OrderService;
 use Illuminate\Console\Command;
 use App\Models\Order;
+use Carbon\Carbon;
 class FinishCrowdfunding extends Command
 {
     /**
@@ -68,7 +69,7 @@ class FinishCrowdfunding extends Command
         ]);
     }
 
-    protected function crowdfundingFailed(CrowdfundingProduct $crowdfunding, OrderService $orderService)
+    protected function crowdfundingFailed(CrowdfundingProduct $crowdfunding)
     {
         // 将众筹状态改为众筹失败
         $crowdfunding->update([

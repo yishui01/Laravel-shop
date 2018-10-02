@@ -14,6 +14,7 @@
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
         "liyu/dingo-serializer-switch": "^0.3.0",
+        "moontoast/math": "^1.1",
         "overtrue/laravel-lang": "^3.0",
         "overtrue/laravel-wechat": "~4.0",
         "predis/predis": "^1.1",
