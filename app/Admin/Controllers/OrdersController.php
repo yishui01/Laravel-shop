@@ -221,7 +221,8 @@ class OrdersController extends Controller
                     'total_fee' => $order->total_amount * 100, //原订单金额，单位：分
                     'refund_fee' => $order->total_amount * 100, //本次要退款的金额，单位：分
                     'out_refund_no' => $refundNo, //退款单号
-                    'notify_url' =>  route('payment.wechat.refund_notify'), //微信退款通知不是同步返回的，要加一个异步通知的回调地址
+                    //'notify_url' =>  route('payment.wechat.refund_notify'), //微信退款通知不是同步返回的，要加一个异步通知的回调地址
+                    'notify_url' => ngrok_url('payment.wechat.refund_notify'), //微信退款通知不是同步返回的，要加一个异步通知的回调地址
                 ]);
                 // 将订单状态改成退款中
                 $order->update([

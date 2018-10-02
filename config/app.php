@@ -12,6 +12,7 @@ return [
     | any other location as required by the application or its packages.
     |
     */
+    'ngrok_url' => env('NGROK_URL'),
 
     'name' => env('APP_NAME', 'Laravel'),
 
