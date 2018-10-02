@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Observer\CategoryObserver;
 use App\Observer\ProductSkuObserver;
 use App\Observer\UserObserver;
+use Carbon\Carbon;
 use Encore\Admin\Facades\Admin;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -26,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
         Carbon::setLocale('zh');
-        
+
         ProductSku::observe(ProductSkuObserver::class);
         User::observe(UserObserver::class);
         Category::observe(CategoryObserver::class);

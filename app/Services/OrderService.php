@@ -46,6 +46,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                 ],
                 'remark'       => $remark,
                 'total_amount' => 0,
+                'type'          => Order::TYPE_NORMAL,
             ]);
 
             $order->user_id = $user->id;
@@ -115,6 +116,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                 ],
                 'remark'       => '',
                 'total_amount' => $sku->price * $amount,
+                'type'          => Order::TYPE_CROWDFUNDING,
             ]);
             // 订单关联到当前用户
             $order->user()->associate($user);

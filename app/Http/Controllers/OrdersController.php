@@ -141,6 +141,10 @@ class OrdersController extends Controller
         if ($order->refund_status !== Order::REFUND_STATUS_PENDING) {
             throw new InvalidRequestException('该订单已经申请过退款，请勿重复申请');
         }
+        // 众筹订单不允许申请退款
+        if ($order->type === Order::TYPE_CROWDFUNDING) {
+            throw new InvalidRequestException('众筹订单不支持退款');
+        }
         //将用户输入的是退款的理由放到订单的extra字段中
         $extra = $order->extra ? : [];
         $extra['refund_reason'] = $request->input('reason');
