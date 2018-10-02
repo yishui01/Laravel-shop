@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\OrderReviewd;
 use App\Http\Requests\ApplyRefundRequest;
+use App\Http\Requests\CrowdFundingOrderRequest;
 use App\Http\Requests\OrderRequest;
 use App\Http\Requests\Request;
 use App\Http\Requests\SendReviewRequest;
@@ -21,7 +22,7 @@ use App\Exceptions\CouponCodeUnavailableException;
 use App\Models\CouponCode;
 class OrdersController extends Controller
 {
-    //下单
+    //普通商品下单
     public function store(OrderRequest $request, OrderService $orderService)
     {
 
@@ -41,6 +42,17 @@ class OrdersController extends Controller
         }
 
         return $orderService->store($user, $address, $request->input('remark'), $request->input('items'), $coupon);
+    }
+
+    //众筹商品下单
+    public function crowdfunding(CrowdFundingOrderRequest $request, OrderService $orderService)
+    {
+        $user    = $request->user();
+        $sku     = ProductSku::find($request->input('sku_id'));
+        $address = UserAddress::find($request->input('address_id'));
+        $amount  = $request->input('amount'); //购买数量
+
+        return $orderService->crowdfunding($user, $address, $sku, $amount);
     }
 
     //订单列表页

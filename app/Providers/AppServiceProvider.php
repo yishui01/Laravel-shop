@@ -25,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
+        Carbon::setLocale('zh');
+        
         ProductSku::observe(ProductSkuObserver::class);
         User::observe(UserObserver::class);
         Category::observe(CategoryObserver::class);

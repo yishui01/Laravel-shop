@@ -44,8 +44,6 @@ Route::group(['middleware' => ['auth']], function() {
     //验证邮箱页面
     Route::get('/email_verification/verify', 'EmailVerificationController@verify')->name('email_verification.verify');
 
-    //编辑资料
-    Route::resource('user_addresses', 'UserAddressesController');
     //收货地址
     Route::resource('user_addresses', 'UserAddressesController');
     //收藏商品和取消收藏
@@ -81,7 +79,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('payment/wechat/refund_notify', 'PaymentController@wechatRefundNotify')->name('payment.wechat.refund_notify');
     //优惠券查询
     Route::get('coupon_codes/{code}', 'CouponCodesController@show')->name('coupon_codes.show');
-
+    //众筹商品下单
+    Route::post('crowdfunding_orders', 'OrdersController@crowdfunding')->name('crowdfunding_orders.store');
 });
 
 

@@ -89,9 +89,8 @@ abstract class CommonProductsController extends Controller
 
             $this->customForm($form); //传对象，改变原值，nice
 
-            $king = $form;
             // 直接添加一对多的关联模型
-            $form->hasMany('pro_attr', '商品属性', function (Form\NestedForm $form) use ($king) {
+            $form->hasMany('pro_attr', '商品属性', function (Form\NestedForm $form) {
                 $form->text('name', '属性名称')->placeholder('请输入该商品具有的属性名称，例如:颜色')->rules('required');
                 $form->radio('hasmany', '属性是否可选')->help('可选代表用户可以选择的属性，比如衣服这个商品的可选属性就是大小、颜色,这些是用户可以选的，唯一的属性比如衣服的生产厂家、生产日期，这样的属性，用户没得选，唯一属性会列在商品介绍中，供用户参考')
                     ->options(['1' => '可选', '0'=> '唯一'])->default('1')->rules('required');
