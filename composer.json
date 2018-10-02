@@ -8,6 +8,7 @@
         "php": ">=7.0.0",
         "barryvdh/laravel-debugbar": "^3.1",
         "dingo/api": "2.0.0-alpha2",
+        "doctrine/dbal": "^2.8",
         "encore/laravel-admin": "1.5.*",
         "endroid/qr-code": "^2.5",
         "fideloper/proxy": "~3.3",
