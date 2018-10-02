@@ -54,12 +54,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // 往服务容器中注入一个名为 alipay 的单例对象
+        // 往服务容器中注入一个名为 alipay 的单例对象，用于普通商品支付回调
         $this->app->singleton('alipay', function () {
             $config = config('pay.alipay');
             //$config['notify_url'] = route($config['notify_url_route_name']);
             $config['notify_url'] =  ngrok_url('payment.alipay.notify');
             $config['return_url'] = route($config['return_url_route_name']);
+            // 判断当前项目运行环境是否为线上环境
+            if (app()->environment() !== 'production') {
+                $config['mode']         = 'dev';
+                $config['log']['level'] = Logger::DEBUG;
+            } else {
+                $config['log']['level'] = Logger::WARNING;
+            }
+            // 调用 Yansongda\Pay 来创建一个支付宝支付对象
+            return Pay::alipay($config);
+        });
+
+        // 往服务容器中注入一个名为 alipay_installment 的单例对象,用于分期回调
+        $this->app->singleton('alipay_installment', function () {
+            $config = config('pay.alipay');
+            //$config['notify_url'] = route($config['notify_url_route_name']);
+            $config['notify_url'] =  ngrok_url('installments.alipay.notify');
+            $config['return_url'] = route('installments.alipay.return');
             // 判断当前项目运行环境是否为线上环境
             if (app()->environment() !== 'production') {
                 $config['mode']         = 'dev';
