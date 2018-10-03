@@ -150,6 +150,7 @@ class OrdersController extends Controller
         });
     }
 
+    //订单发货
     public function ship(Order $order, Request $request)
     {
         //判断当前订单是否已支付
@@ -186,7 +187,7 @@ class OrdersController extends Controller
     }
 
 
-    //后台拒绝退款
+    //后台执行订单退款逻辑
     public function handleRefund(Order $order, HandleRefundRequest $request, OrderService $orderService)
     {
         // 判断订单状态是否正确

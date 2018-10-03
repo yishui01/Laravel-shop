@@ -50,6 +50,7 @@ class Installment extends Model
         return $this->hasMany(InstallmentItem::class);
     }
 
+    //生成分期订单流水号
     public static function findAvailableNo()
     {
         // 分期流水号前缀
@@ -66,4 +67,24 @@ class Installment extends Model
 
         return false;
     }
+
+    //判断当前所有还款计划是否全部退款成功
+    public function refreshRefundStatus()
+    {
+        $allSuccess = true;
+        // 重新加载 items，保证与数据库中数据同步
+        $this->load(['items']);
+        foreach ($this->items as $item) {
+            if ($item->paid_at && $item->refund_status !== InstallmentItem::REFUND_STATUS_SUCCESS) {
+                $allSuccess = false;
+                break;
+            }
+        }
+        if ($allSuccess) {
+            $this->order->update([
+                'refund_status' => Order::REFUND_STATUS_SUCCESS,
+            ]);
+        }
+    }
+
 }

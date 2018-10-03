@@ -13,6 +13,7 @@ use App\Jobs\CloseOrder;
 use Carbon\Carbon;
 use App\Exceptions\CouponCodeUnavailableException;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\RefundInstallmentOrder;
 class OrderService
 {
     /*$user、$address 变量改为从参数获取。我们在封装功能的时候有一点一定要注意，
@@ -159,7 +160,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                     'total_fee' => $order->total_amount * 100,
                     'refund_fee' => $order->total_amount * 100,
                     'out_refund_no' => $refundNo,
-                    'notify_url' => ngrok_url('payment.wechat.refund_notify'),
+                    'notify_url' => ngrok_url('payment.wechat.refund_notify'), //可以直接传入，有效
                 ]);
                 $order->update([
                     'refund_no' => $refundNo,
@@ -187,6 +188,14 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                         'refund_status' => Order::REFUND_STATUS_SUCCESS,
                     ]);
                 }
+                break;
+            case 'installment':
+                $order->update([
+                    'refund_no' => Order::getAvailableRefundNo(), // 生成退款订单号
+                    'refund_status' => Order::REFUND_STATUS_PROCESSING, // 将退款状态改为退款中
+                ]);
+                // 触发退款异步任务
+                dispatch(new RefundInstallmentOrder($order));
                 break;
             default:
                 throw new SystemException('未知订单支付方式：' . $order->payment_method);

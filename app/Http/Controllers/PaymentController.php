@@ -26,7 +26,7 @@ class PaymentController extends Controller
             'subject'      => '支付 Laravel Shop 的订单：'.$order->no, // 订单标题
         ]);
     }
-    //前端回调
+    //普通商品支付宝前端回调
     public function alipayReturn()
     {
         try {
@@ -36,7 +36,7 @@ class PaymentController extends Controller
         }
         return view('pages.success', ['msg' => '付款成功']);
     }
-    //服务器端回调
+    //普通商品支付宝服务器端回调
     public function alipayNotify()
     {
         // 校验输入参数
@@ -84,7 +84,7 @@ class PaymentController extends Controller
         return response($qrCode->writeString(), 200, ['Content-Type' => $qrCode->getContentType()]);
     }
 
-    //微信扫码支付服务端回调
+    //普通商品微信扫码支付服务端回调
     public function wechatNotify()
     {
         // 校验回调参数是否正确
@@ -117,6 +117,7 @@ class PaymentController extends Controller
         event(new OrderPaid($order));
     }
 
+    //普通商品微信退款服务端通知
     public function wechatRefundNotify(Request $request)
     {
         // 给微信的失败响应
@@ -158,6 +159,7 @@ class PaymentController extends Controller
     }
 
 
+    //用户选择分期付款期数，创建还款计划
     public function payByInstallment(Order $order, Request $request)
     {
         // 判断订单是否属于当前用户

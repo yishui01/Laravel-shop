@@ -111,3 +111,6 @@ Route::get('products/{product}', 'ProductsController@show')->name('products.show
 Route::post('installments/alipay/notify', 'InstallmentsController@alipayNotify')->name('installments.alipay.notify');
 // 分期付款微信扫码支付后端回调
 Route::post('installments/wechat/notify', 'InstallmentsController@wechatNotify')->name('installments.wechat.notify');
+
+//分期退款微信回调地址（支付宝的不用回调，同步获取信息）
+Route::post('installments/wechat/refund_notify', 'InstallmentsController@wechatRefundNotify')->name('installments.wechat.refund_notify');
