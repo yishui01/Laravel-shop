@@ -63,6 +63,14 @@ class Product extends Model
         return \Storage::disk('public')->url($this->attributes['image']);
     }
 
+    //获取这个商品下的属性以及属性值（可选属性可唯一属性都找出来）
+    public function getPropertiesAttribute()
+    {
+        //所有的属性（包括可选和唯一）
+        ProductAttribute::where('product_id', $this->attributes['id'])->get();
+
+    }
+
     //获取商品详情页面的SKU以及可选属性和唯一属性
     public function getSkuDetail()
     {
@@ -92,6 +100,59 @@ class Product extends Model
             ->limit(10)->get();
     }
 
+    //将商品信息转换成ElasticSearch的存储数组
+    public function toESArray()
+    {
+        // 只取出需要的字段
+        $arr = array_only($this->toArray(), [
+            'id',
+            'type',
+            'title',
+            'category_id',
+            'long_title',
+            'on_sale',
+            'rating',
+            'sold_count',
+            'review_count',
+            'price',
+        ]);
 
+        // 如果商品有类目，则 category 字段为类目名数组，否则为空字符串
+        $arr['category'] = $this->category ? explode(' - ', $this->category->full_name) : '';
+        // 类目的 path 字段
+        $arr['category_path'] = $this->category ? $this->category->path : '';
+        // strip_tags 函数可以将 html 标签去除
+        $arr['description'] = strip_tags($this->description);
+        // 只取出需要的 SKU 字段
+        $arr['skus'] = $this->skus->map(function (ProductSku $sku) {
+            return array_only($sku->toArray(), ['title', 'description', 'price']);
+        })->toArray();
+        // 只取出需要的商品属性字段
+        $arr['properties'] = $this->getProperties();
+
+        return $arr;
+    }
+
+    //获取这个商品下的所有属性名=>属性值（包括可选和唯一两种属性）
+    public function getProperties()
+    {
+        //商品属性有两种，
+        //唯一，可以直接从属性表中的val字段拿到属性值
+        //可选，属性表只记录了属性名，属性值存在Attrubutes表中
+        $property_arr = [];
+        foreach ($this->pro_attr as $k => $attr) {
+            if ($attr->hasmany == 0) {
+                //唯一属性
+                $property_arr[] = ['name' => $attr->name, 'value' => $attr->val];
+            } else {
+                //可选属性
+                $select_arr = Attribute::where('attr_id', $attr->id)->get(); //所有的可选属性值
+                foreach ($select_arr as $select) {
+                    $property_arr[] = ['name' => $attr->name, 'value' => $select->attr_val];
+                }
+            }
+        }
+        return $property_arr;
+    }
 
 }

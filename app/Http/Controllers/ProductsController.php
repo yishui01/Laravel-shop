@@ -74,7 +74,7 @@ class ProductsController extends Controller
         if (!$product || !$product->on_sale) {
             throw new InvalidRequestException('该商品未上架');
         }
-
+        dd($product->toESArray());
         $sku_data = $product->getSkuDetail(); //sku以及属性数据
 
         $favorite = false;                    //是否收藏了该商品
