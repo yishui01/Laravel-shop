@@ -75,6 +75,7 @@ abstract class CommonProductsController extends Controller
         return Admin::form(Product::class, function (Form $form)  use ($options, $category_id){
             // 创建一个输入框，第一个参数 title 是模型的字段名，第二个参数是该字段描述
             $form->text('title', '商品名称')->rules('required');
+            $form->text('long_title', '商品长标题')->rules('required');
             $form->select('category_id', '商品分类')
                 ->options($options)->default($category_id)->rules('required');
 

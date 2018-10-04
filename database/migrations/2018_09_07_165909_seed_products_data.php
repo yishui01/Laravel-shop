@@ -26,6 +26,7 @@ class SeedProductsData extends Migration
         //商品表
         $products_data = [
             'title'       => 'iphone6s',
+            'long_title'       => '最新 2018 苹果手机 iphone6s 256G',
             'description' => '新品上市',
             'image'       => 'https://img13.360buyimg.com/n1/s450x450_jfs/t7369/88/1302655817/65372/de8c58bf/599bf84dN8b816781.jpg',
             'on_sale'     => 1, //是否上架
