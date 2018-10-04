@@ -3,6 +3,7 @@
 namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SyncOneProductToES;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Facades\Admin;
@@ -97,6 +98,10 @@ abstract class CommonProductsController extends Controller
                     ->options(['1' => '可选', '0'=> '唯一'])->default('1')->rules('required');
                 $form->text('val', '属性值')->placeholder('当属性为唯一时填写该项，可选属性不用填写该项（可选属性值在设置库存时再填写）');
                 $form->radio('is_search', '是否参与分面搜索')->options(['0'=>'不参与', '1'=>'参与'])->default('1');
+            });
+            $form->saved(function (Form $form) {
+                $product = $form->model();
+                $this->dispatch(new SyncOneProductToES($product));
             });
 
         });

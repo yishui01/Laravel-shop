@@ -43,13 +43,13 @@ Route::prefix('sms')->group(function () {
 
 
 Route::group(['middleware' => ['my_auth']], function() {
-   /* //未验证邮箱的重定向页面
+    //未验证邮箱的重定向页面
     Route::get('/email_verify_notice', 'PagesController@emailVerifyNotice')->name('email_verify_notice');
     //手动发送验证以邮件页面
     Route::get('/email_verification/send', 'EmailVerificationController@send')->name('email_verification.send');
     //验证邮箱页面
     Route::get('/email_verification/verify', 'EmailVerificationController@verify')->name('email_verification.verify');
-*/
+
     //收货地址
     Route::resource('user_addresses', 'UserAddressesController');
     //收藏商品和取消收藏

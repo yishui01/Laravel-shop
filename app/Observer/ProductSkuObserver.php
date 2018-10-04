@@ -2,6 +2,7 @@
 
 namespace App\Observer;
 
+use App\Jobs\SyncOneProductToES;
 use App\Models\Product;
 use App\Models\ProductSku;
 
@@ -11,6 +12,7 @@ class ProductSkuObserver
     public function saved(ProductSku $sku)
     {
         $this->updateMinPrice($sku->product_id);
+        dispatch(new SyncOneProductToES($sku->product));
     }
 
     public function deleted($sku)

@@ -30,6 +30,8 @@ class RegisteredListener
         //获取用户
         $user = $event->user;
         //发送邮件
-        $user->notify(new EmailVerificationNotification());
+        if ($user->email) {
+            $user->notify(new EmailVerificationNotification());
+        }
     }
 }
