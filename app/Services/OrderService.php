@@ -26,6 +26,8 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
     而使用 app() 或者自动解析注入等方式 Laravel 则会自动帮我们处理掉这些依赖。
 之前在控制器中可以通过 $this->dispatch() 方法来触发任务类，但在我们的封装的类中并没有这个方法，
     因此关闭订单的任务类改为 dispatch() 辅助函数来触发。*/
+
+    //普通商品下单
     public function store(User $user, UserAddress $address, $remark, $items, CouponCode $coupon = null)
     {
         // 如果传入了优惠券，则先检查是否可用
@@ -101,7 +103,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
         return $order;
     }
 
-    // 新建一个 crowdfunding 方法用于实现众筹商品下单逻辑
+    // 众筹商品下单
     public function crowdfunding(User $user, UserAddress $address, ProductSku $sku, $amount)
     {
         // 开启事务
@@ -148,6 +150,50 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
         return $order;
     }
 
+    //秒杀商品下单
+    public function seckill(User $user, UserAddress $address, ProductSku $sku)
+    {
+        $order = \DB::transaction(function () use ($user, $address, $sku) {
+            // 更新此地址的最后使用时间
+            $address->update(['last_used_at' => Carbon::now()]);
+            // 创建一个订单
+            $order = new Order([
+                'address'      => [ // 将地址信息放入订单中
+                    'address'       => $address->full_address,
+                    'zip'           => $address->zip,
+                    'contact_name'  => $address->contact_name,
+                    'contact_phone' => $address->contact_phone,
+                ],
+                'remark'       => '',
+                'total_amount' => $sku->price,
+                'type'         => Order::TYPE_SECKILL,
+            ]);
+            // 订单关联到当前用户
+            $order->user()->associate($user);
+            // 写入数据库
+            $order->save();
+            // 创建一个新的订单项并与 SKU 关联
+            $item = $order->items()->make([
+                'amount' => 1, // 秒杀商品只能一份
+                'price'  => $sku->price,
+            ]);
+            $item->product()->associate($sku->product_id);
+            $item->productSku()->associate($sku);
+            $item->save();
+            // 扣减对应 SKU 库存
+            if ($sku->decreaseStock(1) <= 0) {
+                throw new InvalidRequestException('该商品库存不足');
+            }
+
+            return $order;
+        });
+        // 秒杀订单的自动关闭时间与普通订单不同
+        dispatch(new CloseOrder($order, config('app.seckill_order_ttl')));
+
+        return $order;
+    }
+
+    //后台同意退款
     public function refundOrder(Order $order)
     {
         // 判断该订单的支付方式
@@ -189,7 +235,7 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
                     ]);
                 }
                 break;
-            case 'installment':
+            case 'installment': //众筹退款
                 $order->update([
                     'refund_no' => Order::getAvailableRefundNo(), // 生成退款订单号
                     'refund_status' => Order::REFUND_STATUS_PROCESSING, // 将退款状态改为退款中

@@ -12,14 +12,15 @@ return [
     | any other location as required by the application or its packages.
     |
     */
-    'ngrok_url' => env('NGROK_URL'),
-    'installment_fee_rate' => [
+    'ngrok_url' => env('NGROK_URL'), //内网穿透分类的公网域名
+    'installment_fee_rate' => [     // 分期费率，key 为期数，value 为费率
         3  => 1.5,
         6  => 2,
         12 => 2.5,
-    ], // 分期费率，key 为期数，value 为费率
-    'min_installment_amount' => 300, // 最低分期金额
-    'installment_fine_rate' => 0.05, // 逾期日息 0.05%
+    ],
+    'min_installment_amount' => 300,  // 最低分期金额
+    'installment_fine_rate'  => 0.05, // 逾期日息 0.05%
+    'seckill_order_ttl'      => 600,  //秒杀订单支付时间，600秒（10分钟）
 
     'name' => env('APP_NAME', 'Laravel'),
 
