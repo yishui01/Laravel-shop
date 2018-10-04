@@ -100,13 +100,20 @@
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active" id="product-detail-tab">
+                                <!-- 产品属性开始 -->
+                                <div class="properties-list">
+                                    <div class="properties-list-title">产品参数：</div>
+                                    <ul class="properties-list-body">
                                 @foreach($unique_attr as $k=>$v)
                                     <span style="width: 30%;display: inline-block;">
                                         {{$v->name}}：{{$v->val}}
                                     </span>
                                     @endforeach
-                                <hr />
+                                    </ul>
+                                </div>
+                                    <div class="product-description">
                                 {!! $product->description !!}
+                                    </div>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="product-reviews-tab">
                                 <!-- 评论列表开始 -->

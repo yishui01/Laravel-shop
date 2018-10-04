@@ -18,6 +18,11 @@ Route::redirect('/', '/products')->name('root');
 //用户登录注册
 Auth::routes();
 
+//登录
+$this->get('login', 'Auth\LoginController@showLoginForm')->name('login');
+$this->post('login', 'Auth\LoginController@login');
+$this->post('logout', 'Auth\LoginController@logout')->name('logout');
+
 //重写注册为手机短信
 Route::get('register', 'Auth\RegisterController@showPart1')->name('register');
 Route::post('checkCaptcha', 'Auth\RegisterController@sendSms')->name('register.checkCaptcha');
@@ -36,14 +41,15 @@ Route::prefix('sms')->group(function () {
         ->name('sms.password.reset'); //更新用户新密码
 });
 
-Route::group(['middleware' => ['auth']], function() {
-    //未验证邮箱的重定向页面
+
+Route::group(['middleware' => ['my_auth']], function() {
+   /* //未验证邮箱的重定向页面
     Route::get('/email_verify_notice', 'PagesController@emailVerifyNotice')->name('email_verify_notice');
     //手动发送验证以邮件页面
     Route::get('/email_verification/send', 'EmailVerificationController@send')->name('email_verification.send');
     //验证邮箱页面
     Route::get('/email_verification/verify', 'EmailVerificationController@verify')->name('email_verification.verify');
-
+*/
     //收货地址
     Route::resource('user_addresses', 'UserAddressesController');
     //收藏商品和取消收藏

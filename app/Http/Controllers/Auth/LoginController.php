@@ -49,10 +49,6 @@ class LoginController extends Controller
      */
     public function showLoginForm(Request $request)
     {
-        if (strpos(url()->previous(), '/login') === false) {
-            //不包含/login字符串的才加入到session，用于登录后重定向到之前的目的页面
-            session(['url.intended' => url()->previous()]);
-        }
         return view('auth.login');
     }
 

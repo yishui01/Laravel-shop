@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductAttribute extends Model
 {
-    protected $fillable = ['name','hasmany','val', 'product_id'];
+    protected $fillable = ['name','hasmany','val', 'product_id', 'is_search'];
 
     //与商品表的关联
     public function product()
