@@ -14,8 +14,8 @@ class CategoriesAddPathLevelIsDirectory extends Migration
     public function up()
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->unsignedInteger('level')->commit('当前层级，最高为0');
-            $table->string('path')->commit('所有父类ID字符串，例如："-","-1-","-1-2-"');
+            $table->unsignedInteger('level')->default(0)->commit('当前层级，最高为0');
+            $table->string('path')->default('')->commit('所有父类ID字符串，例如："-","-1-","-1-2-"');
         });
     }
 

@@ -27,8 +27,10 @@ class Category extends Model
     //获取所有祖先类目的ID值
     public function getPathIdsAttribute()
     {
-        //去除两端的 '-', 再打断成数组，再取出空值
-        return array_filter(explode('-', trim($this->path, '-')));
+        //去除两端的 '-', 再打断成数组,再去除空值,再删除最后一个元素（因为最后一个元素为自己本身ID）
+        $all_ids = array_filter(explode('-', trim($this->path, '-')));
+        array_pop($all_ids);
+        return $all_ids;
     }
 
     //获取所有祖先类目并按层级排序
@@ -44,7 +46,7 @@ class Category extends Model
     public function getAllChildrenIdAttribute()
     {
         return Category::query()
-            ->where('path', 'like', $this->path.$this->id.'-%')
+            ->where('path', 'like', $this->path.'%')
             ->pluck('id')->toArray();
     }
 
@@ -54,7 +56,7 @@ class Category extends Model
         return $this->ancestors
             ->pluck('name')
             ->push($this->name)
-            ->implode(' — ');
+            ->implode('-');
     }
 
     //显示已经启用的类目

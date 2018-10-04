@@ -46,10 +46,14 @@ class ProductsController extends Controller
                 }
             }
         }
+
         //通过类别来搜索
         if ($request->input('category_id') && $category = Category::find($request->input('category_id'))) {
-                // 否则直接通过 category_id 筛选
-                $params['body']['query']['bool']['filter'][] = ['term' => ['category_id' => $category->id]];
+            //这里直接通过path字段来搜索了，教材的顶级分类的path为 - ，而本项目的顶级分类的path为 -自己的id-
+            //所以不用管是不是目录，直接搜path就行
+            $params['body']['query']['bool']['filter'][] = [
+                'prefix' => ['category_path' => $category->path],
+            ];
         }
         //通过关键字来搜索
         if ($search = $request->input('search', '')) {
@@ -109,7 +113,7 @@ class ProductsController extends Controller
         if (!$product || !$product->on_sale) {
             throw new InvalidRequestException('该商品未上架');
         }
-
+        dd($product->toESArray());
         $sku_data = $product->getSkuDetail(); //sku以及属性数据
 
         $favorite = false;                    //是否收藏了该商品
