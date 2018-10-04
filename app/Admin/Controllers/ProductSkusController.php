@@ -184,6 +184,7 @@ class ProductSkusController extends Controller
 
     public function skuSave()
     {
+
         DB::transaction(function (){
             if ( !($sku_obj = ProductSku::find(request()->input('id')))) {
                 $sku_obj = new ProductSku();
@@ -214,6 +215,7 @@ class ProductSkusController extends Controller
 
                 }
             }
+            $sku_obj->description  = $sku_obj->description ?? '';
             $sku_obj->attributes = implode(',',$id_arr);
             $sku_obj->title = implode(',',$val_arr); //冗余字段
             $sku_obj->save();

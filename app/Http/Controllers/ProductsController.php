@@ -15,9 +15,8 @@ class ProductsController extends Controller
 {
     public function index(Request $request)
     {
-        $page    = $request->input('page', 1) < 1 ?: 1;
+        $page    = $request->input('page', 0) > 1 ? $request->input('page', 0) : 1;
         $perPage = 16;
-
         // 构建查询
         $params = [
             'index' => 'products',
