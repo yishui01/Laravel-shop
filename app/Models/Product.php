@@ -154,12 +154,12 @@ class Product extends Model
         foreach ($this->pro_attr as $k => $attr) {
             if ($attr->hasmany == 0) {
                 //唯一属性
-                $property_arr[] = ['name' => $attr->name, 'value' => $attr->val];
+                $property_arr[] = ['name' => $attr->name, 'value' => $attr->val, 'search_value' => $attr->name . $attr->val];
             } else {
                 //可选属性
                 $select_arr = Attribute::where('attr_id', $attr->id)->get(); //所有的可选属性值
                 foreach ($select_arr as $select) {
-                    $property_arr[] = ['name' => $attr->name, 'value' => $select->attr_val];
+                    $property_arr[] = ['name' => $attr->name, 'value' => $select->attr_val, 'search_value' => $attr->name . $select->attr_val];
                 }
             }
         }
