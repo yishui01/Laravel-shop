@@ -6,6 +6,7 @@ use App\Exceptions\InvalidRequestException;
 use App\Models\Attribute;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
@@ -86,10 +87,7 @@ class ProductsController extends Controller
         // 通过 collect 函数将返回结果转为集合，并通过集合的 pluck 方法取到返回的商品 ID 数组
         $productIds = collect($result['hits']['hits'])->pluck('_id')->all();
         // 通过 whereIn 方法从数据库中读取商品数据
-        $products = Product::query()
-            ->whereIn('id', $productIds)
-            ->orderByRaw(sprintf("FIND_IN_SET(id, '%s')", join(',', $productIds)))
-            ->get();
+        $products = Product::query()->byIds($productIds)->get();
         // 返回一个 LengthAwarePaginator 对象
         $pager = new LengthAwarePaginator($products, $result['hits']['total'], $perPage, $page, [
             'path' => route('products.index', false), // 手动构建分页的 url
@@ -110,11 +108,16 @@ class ProductsController extends Controller
     }
 
     //商品详情
-    public function show(Product $product)
+    public function show(Product $product, ProductService $productService)
     {
         if (!$product || !$product->on_sale) {
             throw new InvalidRequestException('该商品未上架');
         }
+
+        /**************************搜索前4个相似的上架商品**************************************/
+        $similarProductIds = $productService->getSimilarProductIds($product, 4);
+        $similarProducts   = $similarProducts   = Product::query()->byIds($similarProductIds)->get();
+        /************************搜索相似商品结束*******************************************/
 
         $sku_data = $product->getSkuDetail(); //sku以及属性数据
 
@@ -131,7 +134,8 @@ class ProductsController extends Controller
                 'reviews'=>$reviews,
                 'skus'=>$sku_data['skus'],
                 'unique_attr'=>$sku_data['unique_attr'],
-                'select_attr'=>$sku_data['select_attr']
+                'select_attr'=>$sku_data['select_attr'],
+                'similar' => $similarProducts, //相似商品
             ]);
 
     }
