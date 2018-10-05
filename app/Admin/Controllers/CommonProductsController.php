@@ -4,6 +4,9 @@ namespace App\Admin\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\SyncOneProductToES;
+use App\Models\Attribute;
+use App\Models\ProductAttribute;
+use App\Models\ProductSku;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Facades\Admin;
@@ -106,5 +109,32 @@ abstract class CommonProductsController extends Controller
             });
 
         });
+    }
+
+    public function destroy($id)
+    {
+        if ($this->form()->destroy($id)) {
+
+            Attribute::where('product_id',$id)->delete();
+            ProductAttribute::where('product_id',$id)->delete();
+            ProductSku::where('product_id',$id)->delete();
+            $params = [
+                'index' => 'products',
+                'type'  => '_doc',
+                'id'    => $id,
+            ];
+            //商品删除的同时把ES里的数据也删了
+            app('es')->delete($params);
+
+            return response()->json([
+                'status'  => true,
+                'message' => trans('admin.delete_succeeded'),
+            ]);
+        } else {
+            return response()->json([
+                'status'  => false,
+                'message' => trans('admin.delete_failed'),
+            ]);
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Jobs\SyncOneProductToES;
 use App\Models\Attribute;
 
 use App\Models\Product;
@@ -113,5 +114,25 @@ class AttributesController extends Controller
 
             $form->text('attr_val', '属性值名称');
         });
+    }
+
+    public function destroy($id)
+    {
+        //更新ES数据库
+        $product = Attribute::find($id)->product;
+        if($product){
+            dispatch(new SyncOneProductToES($product));
+        }
+        if ($this->form()->destroy($id)) {
+            return response()->json([
+                'status'  => true,
+                'message' => trans('admin.delete_succeeded'),
+            ]);
+        } else {
+            return response()->json([
+                'status'  => false,
+                'message' => trans('admin.delete_failed'),
+            ]);
+        }
     }
 }

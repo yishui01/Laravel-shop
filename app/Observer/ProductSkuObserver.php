@@ -18,6 +18,9 @@ class ProductSkuObserver
     public function deleted($sku)
     {
         $this->updateMinPrice($sku->product_id);
+        if($sku->product){
+            dispatch(new SyncOneProductToES($sku->product));
+        }
     }
 
     protected function updateMinPrice($product_id)
