@@ -159,7 +159,7 @@ class Product extends Model
                 //可选属性
                 $select_arr = Attribute::where('attr_id', $attr->id)->get(); //所有的可选属性值
                 foreach ($select_arr as $select) {
-                    $property_arr[] = ['name' => $attr->name, 'value' => $select->attr_val, 'search_value' => $attr->name . $select->attr_val];
+                    $property_arr[] = ['name' => $attr->name, 'value' => $select->attr_val, 'search_value' => $attr->name .':'. $select->attr_val];
                 }
             }
         }
