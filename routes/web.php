@@ -12,7 +12,7 @@
 */
 
 //秒杀商品下单
-Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.store');
+Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.store')->middleware('random_drop:80');
 
 //首页
 Route::redirect('/', '/products')->name('root');
