@@ -39,7 +39,12 @@ class SeckillOrderRequest extends Request
                     if (!$user = \Auth::user()) {
                         throw new AuthenticationException('请先登录');
                     }
-                    if ($order = Order::query()
+                    // 从 Redis 中读取已经下单了并且订单未过期的用户数据，这些用户不可重复下单
+                    $have_user = \Redis::get('seckill_sku_'.$value.'_user_'.$this->user()->id);
+                    if ($have_user) {
+                        return $fail('你已经下单了该商品，请到订单页面支付');
+                    }
+                    /*if ($order = Order::query()
                         // 筛选出当前用户的订单
                         ->where('user_id', $this->user()->id)
                         ->whereHas('items', function ($query) use ($value) {
@@ -58,7 +63,7 @@ class SeckillOrderRequest extends Request
                         }
 
                         return $fail('你已经下单了该商品，请到订单页面支付');
-                    }
+                    }*/
                 },
             ],
         ];

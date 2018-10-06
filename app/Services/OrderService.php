@@ -182,6 +182,9 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
             $item->save();
             // 扣减对应 SKU 库存
             \Redis::decr('seckill_sku_'.$sku->id);
+            // 生成一个用户key，标记用户已经下单过
+            \Redis::setex('seckill_sku_'.$sku->id.'_user_'.$user->id, config('app.seckill_order_ttl'), $user->id);
+
             /*if ($sku->decreaseStock(1) <= 0) {
                 throw new InvalidRequestException('该商品库存不足');
             }*/
