@@ -520,8 +520,9 @@
                         return;
                     }
                     // 构建请求参数
+                    var address = _.find(addresses, {id: parseInt(addressSelector.val())});
                     var req = {
-                        address_id: addressSelector.val(),
+                        address: _.pick(address, ['province','city','district','address','zip','contact_name','contact_phone']),
                         sku_id: skuid
                     };
                     // 调用秒杀商品下单接口

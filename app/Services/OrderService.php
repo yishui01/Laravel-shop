@@ -151,18 +151,18 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
     }
 
     //秒杀商品下单
-    public function seckill(User $user, UserAddress $address, ProductSku $sku)
+    public function seckill(User $user, array $addressData, ProductSku $sku)
     {
-        $order = \DB::transaction(function () use ($user, $address, $sku) {
+        $order = \DB::transaction(function () use ($user, $addressData, $sku) {
             // 更新此地址的最后使用时间
-            $address->update(['last_used_at' => Carbon::now()]);
+           // $address->update(['last_used_at' => Carbon::now()]);
             // 创建一个订单
             $order = new Order([
-                'address'      => [ // 将地址信息放入订单中
-                    'address'       => $address->full_address,
-                    'zip'           => $address->zip,
-                    'contact_name'  => $address->contact_name,
-                    'contact_phone' => $address->contact_phone,
+                'address'      => [ // address 字段直接从 $addressData 数组中读取
+                    'address'       => $addressData['province'].$addressData['city'].$addressData['district'].$addressData['address'],
+                    'zip'           => $addressData['zip'],
+                    'contact_name'  => $addressData['contact_name'],
+                    'contact_phone' => $addressData['contact_phone'],
                 ],
                 'remark'       => '',
                 'total_amount' => $sku->price,
@@ -181,9 +181,10 @@ CartService 的调用方式改为了通过 app() 函数创建，因为这个 sto
             $item->productSku()->associate($sku);
             $item->save();
             // 扣减对应 SKU 库存
-            if ($sku->decreaseStock(1) <= 0) {
+            \Redis::decr('seckill_sku_'.$sku->id);
+            /*if ($sku->decreaseStock(1) <= 0) {
                 throw new InvalidRequestException('该商品库存不足');
-            }
+            }*/
 
             return $order;
         });

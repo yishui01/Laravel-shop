@@ -32,13 +32,13 @@
                                                     <td class="product-info">
                                                         <div class="preview">
                                                             <a target="_blank" href="{{ route('products.show', [$item->product_id]) }}">
-                                                                <img src="{{ $item->product->image_url }}">
+                                                               <img src="{{ $item->product->full_image }}">
                                                             </a>
                                                         </div>
                                                         <div>
-                    <span class="product-title">
-                       <a target="_blank" href="{{ route('products.show', [$item->product_id]) }}">{{ $item->product->title }}</a>
-                     </span>
+                                        <span class="product-title">
+                                           <a target="_blank" href="{{ route('products.show', [$item->product_id]) }}">{{ $item->product->title }}</a>
+                                         </span>
                                                             <span class="sku-title">{{ $item->productSku->title }}</span>
                                                         </div>
                                                     </td>
@@ -57,7 +57,7 @@
                                                                 已关闭
                                                             @else
                                                                 未支付<br>
-                                                                请于 {{ $order->created_at->addMinutes(config('myconfig.order.order_ttl'))->format('H:i') }} 前完成支付<br>
+                                                                请于 {{ $order->type=\App\Models\Order::TYPE_SECKILL ? $order->created_at->addSecond(config('app.seckill_order_ttl'))->format('Y-m-d H:i') : $order->created_at->addSecond(config('myconfig.order.order_ttl'))->format('Y-m-d H:i') }} 前完成支付<br>
                                                                 否则订单将自动关闭
                                                             @endif
                                                         </td>

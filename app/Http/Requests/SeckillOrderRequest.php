@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Exceptions\InvalidRequestException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Validation\Rule;
 use App\Models\ProductSku;
 use App\Models\Product;
@@ -12,26 +14,31 @@ class SeckillOrderRequest extends Request
     public function rules()
     {
         return [
-            'address_id' => [
-                'required',
-                Rule::exists('user_addresses', 'id')->where('user_id', $this->user()->id)
-            ],
+            // 将原本的 address_id 删除
+            'address.province'      => 'required',
+            'address.city'          => 'required',
+            'address.district'      => 'required',
+            'address.address'       => 'required',
+            'address.zip'           => 'required',
+            'address.contact_name'  => 'required',
+            'address.contact_phone' => 'required',
             'sku_id'     => [
                 'required',
                 function ($attribute, $value, $fail) {
-                    if (!$sku = ProductSku::find($value)) {
+                    // 从 Redis 中读取数据
+                    $stock = \Redis::get('seckill_sku_'.$value);
+                    // 如果是 null 代表这个 SKU 不是秒杀商品
+                    if (is_null($stock)) {
                         return $fail('该商品不存在');
                     }
-                    if ($sku->product->type !== Product::TYPE_SECKILL) {
-                        return $fail('该商品不支持秒杀');
-                    }
-                    if (!$sku->product->on_sale) {
-                        return $fail('该商品未上架');
-                    }
-                    if ($sku->stock < 1) {
+                    // 判断库存
+                    if ($stock < 1) {
                         return $fail('该商品已售完');
                     }
-
+                    //延迟校验是否登录，仅当秒杀商品还有剩余时再校验
+                    if (!$user = \Auth::user()) {
+                        throw new AuthenticationException('请先登录');
+                    }
                     if ($order = Order::query()
                         // 筛选出当前用户的订单
                         ->where('user_id', $this->user()->id)
