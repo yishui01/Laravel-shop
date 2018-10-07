@@ -77,6 +77,7 @@ class UsersController extends Controller
             $grid->id('ID')->sortable();
             // 创建一个列名为 用户名 的列，内容是用户的 name 字段。下面的 email() 和 created_at() 同理
             $grid->name('用户名');
+            $grid->phone('手机号');
 
             $grid->email('邮箱');
 
@@ -123,9 +124,14 @@ class UsersController extends Controller
             $form->display('id', 'ID');
             $form->text('name','用户名');
             $form->password('password','密码');
+            $form->text('phone','手机号');
             $form->email('email');
             $form->radio('email_verified','已验证邮箱')->options(['0' => '未验证', '1'=> '已验证'])->default('0');
-
+            $form->saved(function (Form $form) {
+                $user = $form->model();
+                $user->password = bcrypt($user->password);
+                $user->save();
+            });
             /*$form->datetime('created_at');
             $form->datetime('updated_at');*/
         });
