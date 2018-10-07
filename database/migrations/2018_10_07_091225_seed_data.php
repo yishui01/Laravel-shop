@@ -200,7 +200,7 @@ class SeedData extends Migration
             [
                 'product_id' => 4,
                 'start_at'   => '2018-10-01 00:00:00',
-                'end_at'     => '2018-12-01 00:00:00',
+                'end_at'     => '2019-9-20 00:00:00',
             ],
             [
                 'product_id' => 6,
@@ -476,7 +476,7 @@ class SeedData extends Migration
         }
 
         //重建ES索引
-        \Illuminate\Support\Facades\Artisan::call('es:rebuild');
+        \Illuminate\Support\Facades\Artisan::call('es:migrate');
     }
 
 
