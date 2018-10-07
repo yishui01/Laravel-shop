@@ -16,11 +16,6 @@ Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.
 
 Route::redirect('/', '/products')->name('root');
 
-//商品列表
-Route::get('products', 'ProductsController@index')->name('products.index');
-//商品详情
-Route::get('products/{product}', 'ProductsController@show')->name('products.show'); //这个要放后面不然会和收藏商品列表冲突
-
 //用户登录注册
 Auth::routes();
 
@@ -106,6 +101,10 @@ Route::group(['middleware' => ['my_auth']], function() {
     //分期付款拉起微信扫码支付
     Route::get('installments/{installment}/wechat', 'InstallmentsController@payByWechat')->name('installments.wechat');
 });
+//商品列表
+Route::get('products', 'ProductsController@index')->name('products.index');
+//商品详情,这个样放后面，不然和我的收藏冲突了
+Route::get('products/{product}', 'ProductsController@show')->name('products.show'); //这个要放后面不然会和收藏商品列表冲突
 
 
 //支付宝扫码服务端回调

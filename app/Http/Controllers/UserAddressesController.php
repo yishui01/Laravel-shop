@@ -18,7 +18,12 @@ class UserAddressesController extends Controller
 
     public function create(Request $request)
     {
+        if(strpos(url()->previous(), 'products') !== false) {
+            //如果是从商品详情页跳过来的
+            session(['address_redirect'=>url()->previous()]);
+        }
         return view('user_addresses.create_and_edit', ['address' => new UserAddress(), 'cart'=>$request->cart]);
+
     }
 
     public function store(UserAddressRequest $request)
@@ -30,6 +35,10 @@ class UserAddressesController extends Controller
         $route_name = 'user_addresses.index';
         if ($request->cart) {
             $route_name = 'cart.index';
+        }
+        if ($redirect_url = session('address_redirect')) {
+            $request->session()->forget('address_redirect'); //删除这个session
+            return redirect($redirect_url)->with('success', '地址添加成功！');
         }
         return redirect()->route($route_name)->with('success', '地址添加成功！');
     }
