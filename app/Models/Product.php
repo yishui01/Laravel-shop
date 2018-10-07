@@ -68,7 +68,7 @@ class Product extends Model
     public function getFullImageAttribute()
     {
         // 如果 image 字段本身就已经是完整的 url 就直接返回
-        if (Str::startsWith($this->attributes['image'], ['http://', 'https://'])) {
+        if (strpos($this->attributes['image'], 'http') !== false) {
             return $this->attributes['image'];
         }
         return \Storage::disk('public')->url($this->attributes['image']);
@@ -138,8 +138,15 @@ class Product extends Model
         $arr['skus'] = $this->skus->map(function (ProductSku $sku) {
             return array_only($sku->toArray(), ['title', 'description', 'price']);
         });
-        // 只取出需要的商品属性字段
-        $arr['properties'] = $this->getProperties();
+        $all_properties = $this->getProperties();
+        $arr['properties'] = array_except($all_properties, 'is_search');
+        // 只取出参与搜索的商品属性字段
+        $arr['search_properties'] = [];
+        foreach ($all_properties as $k=>$v){
+            if($v['is_search'] == 1) {
+                $arr['search_properties'][] = $v;
+            }
+        }
 
         return $arr;
     }
@@ -154,12 +161,12 @@ class Product extends Model
         foreach ($this->pro_attr as $k => $attr) {
             if ($attr->hasmany == 0) {
                 //唯一属性
-                $property_arr[] = ['name' => $attr->name, 'value' => $attr->val, 'search_value' => $attr->name . $attr->val];
+                $property_arr[] = ['is_search' => $attr->is_search, 'name' => $attr->name, 'value' => $attr->val, 'search_value' => $attr->name .':'. $attr->val];
             } else {
                 //可选属性
                 $select_arr = Attribute::where('attr_id', $attr->id)->get(); //所有的可选属性值
                 foreach ($select_arr as $select) {
-                    $property_arr[] = ['name' => $attr->name, 'value' => $select->attr_val, 'search_value' => $attr->name .':'. $select->attr_val];
+                    $property_arr[] = ['is_search' => $attr->is_search, 'name' => $attr->name, 'value' => $select->attr_val, 'search_value' => $attr->name .':'. $select->attr_val];
                 }
             }
         }

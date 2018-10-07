@@ -10,13 +10,12 @@
                             <img class="cover" src="{{ $product->full_image }}" alt="">
                         </div>
                         <div class="col-sm-7">
-                            <div class="title">{{ $product->title }}</div>
+                            <div class="title">{{ $product->long_title }}</div>
                             <!-- 众筹商品模块开始 -->
-
                             @if($product->type === \App\Models\Product::TYPE_CROWDFUNDING)
                                 <div class="crowdfunding-info">
-                                    <div class="have-text">已筹到</div>
-                                    <div class="total-amount"><span class="symbol">￥</span>{{ $product->crowdfunding->total_amount }}</div>
+                                    <div class="price"><label  style="color: #2ab27b;font-size: 16px;">众筹价:</label><em>￥</em><span id="sku_price">{{ $product->price }}</span></div>
+                                    <div class="total-amount"><span class="symbol">已筹到￥</span>{{ $product->crowdfunding->total_amount }}</div>
                                     <!-- 这里使用了 Bootstrap 的进度条组件 -->
                                     <div class="progress">
                                         <div class="progress-bar progress-bar-success progress-bar-striped"
@@ -41,12 +40,33 @@
                                             <!-- Carbon 对象的 diffForHumans() 方法可以计算出与当前时间的相对时间，更人性化 -->
                                             筹款将在<span class="text-red">{{ $product->crowdfunding->end_at->diffForHumans(now()) }}</span>结束！
                                         </div>
+
                                     @endif
                                 </div>
                             @else
                             <!-- 原普通商品模块开始 -->
-                            <div class="price"><label>价格</label><em>￥</em><span id="sku_price">{{ $product->price }}</span></div>
-                            <div class="sales_and_reviews">
+                            @if($product->type == \App\Models\Product::TYPE_SECKILL)
+
+                            <div class="price">
+                                <div style="color:white;background: {{!$product->seckill->is_before_start && !$product->seckill->is_after_end ? '#c920cc' : 'black'}};font-size: 14px;padding:0 10px;">
+                                    <div style="display: inline-block;">水货秒杀</div>
+                                    @if($product->seckill->is_before_start)
+                                    <div style="display: inline-block;float: right">距离开始：<div  id="from_skill_start" style="display: inline-block" ></div> </div>
+                                    @elseif(!$product->seckill->is_before_start && !$product->seckill->is_after_end)
+                                    <div style="display: inline-block;float: right">距离结束：<div  id="from_skill_end" style="display: inline-block"></div> </div>
+                                    @else
+                                    <div style="display: inline-block;float: right">抢购已结束 </div>
+                                    @endif
+                                </div>
+                                <label style="color: red;font-size: 16px;">秒杀价:</label><em>￥</em>
+                                <span id="sku_price">{{ $product->price }}</span>
+                            </div>
+                            @elseif($product->type == \App\Models\Product::TYPE_CROWDFUNDING)
+                            <div class="price"><label  style="color: #2ab27b;font-size: 16px;">众筹价:</label><em>￥</em><span id="sku_price">{{ $product->price }}</span></div>
+                            @else
+                           <div class="price"><label>价格</label><em>￥</em><span id="sku_price">{{ $product->price }}</span></div>
+                           @endif
+                                    <div class="sales_and_reviews">
                                 <div class="sold_count">累计销量 <span class="count">{{ $product->sold_count }}</span></div>
                                 <div class="review_count">累计评价 <span class="count">{{ $product->review_count }}</span></div>
                                 <div class="rating" title="评分 {{ $product->rating }}">评分 <span class="count">{{ str_repeat('★', floor($product->rating)) }}{{ str_repeat('☆', 5 - floor($product->rating)) }}</span></div>
@@ -65,8 +85,15 @@
                             </div>
 
                             <div class="cart_amount">
+
                                 <label>数量</label>
-                                <input type="text" class="form-control input-sm" value="1"><span>件</span><span class="stock"></span></div>
+                                @if($product->type == \App\Models\Product::TYPE_SECKILL)
+                                <input type="text" disabled class="form-control input-sm" value="1"><span>件（秒杀商品每次只能购买一件）</span><span class="stock"></span></div>
+
+                            @else
+                                    <input type="text" class="form-control input-sm" value="1"><span>件</span><span class="stock"></span></div>
+                                    @endif
+
                             <div class="buttons">
                                     @if($favorite)
                                         <button class="btn btn-danger btn-disfavor">取消收藏</button>
@@ -90,7 +117,7 @@
                                         @elseif($product->type === \App\Models\Product::TYPE_SECKILL)
                                             @if(Auth::check())
                                                 @if($product->seckill->is_before_start)
-                                                    <button class="btn btn-primary btn-seckill disabled countdown">抢购倒计时</button>
+                                                    <button class="btn btn-primary btn-seckill disabled countdown">抢购未开始</button>
                                                 @elseif($product->seckill->is_after_end)
                                                     <button class="btn btn-primary btn-seckill disabled">抢购已结束</button>
                                                 @else
@@ -169,7 +196,7 @@
                                             <div class="top">
                                                 <div class="img">
                                                     <a href="{{ route('products.show', ['product' => $product->id]) }}">
-                                                        <img src="{{ $product->image_url }}" alt="">
+                                                        <img src="{{ $product->full_image }}" alt="">
                                                     </a>
                                                 </div>
                                                 <div class="price"><b>￥</b>{{ $product->price }}</div>
@@ -195,7 +222,7 @@
 </style>
 @section('scriptsAfterJs')
     <!-- 如果是秒杀商品并且尚未开始秒杀，则引入 momentjs 类库 -->
-    @if($product->type == \App\Models\Product::TYPE_SECKILL && $product->seckill->is_before_start)
+    @if($product->type == \App\Models\Product::TYPE_SECKILL)
         <script src="https://cdn.bootcss.com/moment.js/2.22.1/moment.min.js"></script>
     @endif
 
@@ -412,7 +439,7 @@
                             address.full_address + ' ' + address.contact_name + ' ' + address.contact_phone +
                             '</option>');
                 });
-                // 在表单中添加一个名为 购买数量 的输入框
+                // 添加收货地址按钮
                 $form.append('<a class="btn btn-success" style="float:left;margin-left:20px;" href="{{route('user_addresses.create')}}" >添加收货地址</a>');
                 // 调用 SweetAlert 弹框
                 swal({
@@ -459,30 +486,65 @@
             });
 
 
-            // 如果是秒杀商品并且尚未开始秒杀
-            @if($product->type == \App\Models\Product::TYPE_SECKILL && $product->seckill->is_before_start)
-            // 将秒杀开始时间转成一个 moment 对象
-            var startTime = moment.unix({{ $product->seckill->start_at->getTimestamp() }});
-            // 设定一个定时器
-            var hdl = setInterval(function () {
-                // 获取当前时间
-                var now = moment();
-                // 如果当前时间晚于秒杀开始时间
-                if (now.isAfter(startTime)) {
-                    // 将秒杀按钮上的 disabled 类移除，修改按钮文字
-                    $('.btn-seckill').removeClass('disabled').removeClass('countdown').text('立即抢购');
-                    // 清除定时器
-                    clearInterval(hdl);
-                    return;
-                }
+            //秒杀商品倒计时
+            @if($product->type == \App\Models\Product::TYPE_SECKILL)
+                @if($product->seckill->is_before_start)
+                // 如果是秒杀商品并且尚未开始秒杀
+                // 将秒杀开始时间转成一个 moment 对象
+                var startTime = moment.unix({{ $product->seckill->start_at->getTimestamp() }});
+                // 设定一个定时器
+                var hdl = setInterval(function () {
+                    // 获取当前时间
+                    var now = moment();
+                    // 如果当前时间晚于秒杀开始时间
+                    if (now.isAfter(startTime)) {
+                        // 将秒杀按钮上的 disabled 类移除，修改按钮文字
+                        $('.btn-seckill').removeClass('disabled').removeClass('countdown').text('立即抢购');
+                        // 清除定时器
+                        clearInterval(hdl);
+                        return;
+                    }
 
-                // 获取当前时间与秒杀开始时间相差的小时、分钟、秒数
-                var hourDiff = startTime.diff(now, 'hours');
-                var minDiff = startTime.diff(now, 'minutes') % 60;
-                var secDiff = startTime.diff(now, 'seconds') % 60;
-                // 修改按钮的文字
-                $('.btn-seckill').text('抢购倒计时 '+hourDiff+':'+minDiff+':'+secDiff);
-            }, 500);
+                    // 获取当前时间与秒杀开始时间相差的小时、分钟、秒数
+                    var dayDiff = startTime.diff(now, 'days');
+                    var hourDiff = startTime.diff(now, 'hours')%24;
+                    var minDiff = startTime.diff(now, 'minutes') % 60;
+                    var secDiff = startTime.diff(now, 'seconds') % 60;
+                    hourDiff = hourDiff < 10 ? '0' + hourDiff : hourDiff;
+                    minDiff  = minDiff < 10 ? '0' + minDiff : minDiff;
+                    secDiff  = secDiff < 10 ? '0' + secDiff : secDiff;
+                    // 修改按钮的文字
+                    $('.btn-seckill').text('抢购未开始');
+                    $('#from_skill_start').text(dayDiff+'天 '+hourDiff+'小时 '+minDiff+'分钟 '+secDiff+"秒");
+
+                }, 1000);
+                @elseif(!$product->seckill->is_before_start && !$product->seckill->is_after_end)
+                    //如果正处于秒杀时段
+                    var endtTime = moment.unix({{ $product->seckill->end_at->getTimestamp() }});
+                    // 设定一个定时器
+                    var hdl = setInterval(function () {
+                        // 获取当前时间
+                        var now = moment();
+                        // 如果当前时间晚于秒杀结束时间
+                        if (now.isAfter(endtTime)) {
+                            // 清除定时器
+                            clearInterval(hdl);
+                            return;
+                        }
+
+                        // 获取当前时间与秒杀开始时间相差的小时、分钟、秒数
+                        console.log(endtTime.diff(now, 'days')+'--'+endtTime.diff(now, 'hours')+'---'+endtTime.diff(now, 'minutes')+'---'+endtTime.diff(now, 'seconds'));
+                        var dayDiff = endtTime.diff(now, 'days');
+                        var hourDiff = endtTime.diff(now, 'hours')%24;
+                        var minDiff = endtTime.diff(now, 'minutes') % 60;
+                        var secDiff = endtTime.diff(now, 'seconds') % 60;
+                        hourDiff = hourDiff < 10 ? '0' + hourDiff : hourDiff;
+                        minDiff  = minDiff < 10 ? '0' + minDiff : minDiff;
+                        secDiff  = secDiff < 10 ? '0' + secDiff : secDiff;
+                        // 修改倒计时的文字
+                        $('#from_skill_end').text(dayDiff+'天 '+hourDiff+'小时 '+minDiff+'分钟 '+secDiff+"秒");
+                    }, 1000);
+                @endif
             @endif
 
             // 秒杀按钮点击事件
@@ -503,16 +565,29 @@
                 // 把用户的收货地址以 JSON 的形式放入页面，赋值给 addresses 变量
                 var addresses = {!! json_encode(Auth::check() ? Auth::user()->addresses : []) !!};
                 // 使用 jQuery 动态创建一个下拉框
-                var addressSelector = $('<select class="form-control"></select>');
+                // 把用户的收货地址以 JSON 的形式放入页面，赋值给 addresses 变量
+                var addresses = {!! json_encode(Auth::check() ? Auth::user()->addresses : []) !!};
+                // 使用 jQuery 动态创建一个表单
+                var $form = $('<form class="form-horizontal" role="form"></form>');
+                // 表单中添加一个收货地址的下拉框
+                $form.append('<div class="form-group">' +
+                    '<label class="control-label col-sm-3">选择地址</label>' +
+                    '<div class="col-sm-9">' +
+                    '<select class="form-control" name="address_id" id="address_id"></select>' +
+                    '</div></div>');
                 // 循环每个收货地址
                 addresses.forEach(function (address) {
                     // 把当前收货地址添加到收货地址下拉框选项中
-                    addressSelector.append("<option value='" + address.id + "'>" + address.full_address + ' ' + address.contact_name + ' ' + address.contact_phone + '</option>');
+                    $form.find('select[name=address_id]')
+                        .append("<option value='" + address.id + "'>" +
+                            address.full_address + ' ' + address.contact_name + ' ' + address.contact_phone +
+                            '</option>');
                 });
-                // 调用 SweetAlert 弹框
+                // 添加收货地址按钮
+                $form.append('<a class="btn btn-success" style="float:left;margin-left:20px;" href="{{route('user_addresses.create')}}" >添加收货地址</a>');
                 swal({
                     text: '选择收货地址',
-                    content: addressSelector[0],
+                    content: $form[0],
                     buttons: ['取消', '确定']
                 }).then(function (ret) {
                     // 如果用户没有点确定按钮，则什么也不做
@@ -520,7 +595,7 @@
                         return;
                     }
                     // 构建请求参数
-                    var address = _.find(addresses, {id: parseInt(addressSelector.val())});
+                    var address = _.find(addresses, {id: parseInt($("#address_id").val())});
                     var req = {
                         address: _.pick(address, ['province','city','district','address','zip','contact_name','contact_phone']),
                         sku_id: skuid

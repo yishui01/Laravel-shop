@@ -50,6 +50,15 @@ class ProjectIndex
                     'search_value' => ['type' => 'keyword'],
                 ],
             ],
+            //增加分面搜索属性字段，有些商品属性是不参与分面搜索的，只将下面这个数组中的属性作为搜索属性展示
+            'search_properties' => [
+                'type'       => 'nested',
+                'properties' => [
+                    'name'         => ['type' => 'keyword'],
+                    'value'        => ['type' => 'keyword', 'copy_to' => 'search_properties_value'],
+                    'search_value' => ['type' => 'keyword'],
+                ],
+            ]
         ];
     }
 

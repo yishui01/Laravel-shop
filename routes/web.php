@@ -14,8 +14,12 @@
 //秒杀商品下单
 Route::post('seckill_orders', 'OrdersController@seckill')->name('seckill_orders.store')->middleware('random_drop:50');
 
-//首页
 Route::redirect('/', '/products')->name('root');
+
+//商品列表
+Route::get('products', 'ProductsController@index')->name('products.index');
+//商品详情
+Route::get('products/{product}', 'ProductsController@show')->name('products.show'); //这个要放后面不然会和收藏商品列表冲突
 
 //用户登录注册
 Auth::routes();
@@ -110,10 +114,6 @@ Route::post('payment/alipay/notify', 'PaymentController@alipayNotify')->name('pa
 Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
 //微信扫码支付回调
 Route::post('payment/wechat/notify', 'PaymentController@wechatNotify')->name('payment.wechat.notify');
-
-Route::get('products', 'ProductsController@index')->name('products.index');
-
-Route::get('products/{product}', 'ProductsController@show')->name('products.show'); //这个要放后面不然会和收藏商品列表冲突
 
 // 分期付款支付宝后端回调
 Route::post('installments/alipay/notify', 'InstallmentsController@alipayNotify')->name('installments.alipay.notify');

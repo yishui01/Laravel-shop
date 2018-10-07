@@ -18,7 +18,7 @@ class ProductsController extends Controller
     public function index(Request $request)
     {
         $page    = $request->input('page', 0) > 1 ? $request->input('page', 0) : 1;
-        $perPage = 16;
+        $perPage = 8;
 
         // 新建查询构造器对象，设置只搜索上架商品，设置分页
         $builder = (new ProductSearchBuilder())->onSale()->paginate($perPage, $page);
@@ -63,12 +63,16 @@ class ProductsController extends Controller
                     $builder->orderBy($m[1], $m[2]);
                 }
             }
+        } else {
+            //默认按照id进行排序
+            $builder->orderBy('id', 'asc');
         }
 
         $result = app('es')->search($builder->getParams());
 
         $properties = [];
         // 如果返回结果里有 aggregations 字段，说明做了分面搜索
+
         if (isset($result['aggregations'])) {
             // 使用 collect 函数将返回值转为集合
             $properties = collect($result['aggregations']['properties']['properties']['buckets'])
@@ -113,7 +117,7 @@ class ProductsController extends Controller
         if (!$product || !$product->on_sale) {
             throw new InvalidRequestException('该商品未上架');
         }
-
+        session(['product_detail_id' => $product->id]); //记录用户最新浏览的是哪个商品，用于未登录-》登陆跳转
         /**************************搜索前4个相似的上架商品**************************************/
         $similarProductIds = $productService->getSimilarProductIds($product, 4);
         $similarProducts   = $similarProducts   = Product::query()->byIds($similarProductIds)->get();

@@ -75,17 +75,17 @@ class ProductSearchBuilder
         $this->params['body']['aggs'] = [
             'properties' => [
                 'nested' => [
-                    'path' => 'properties',
+                    'path' => 'search_properties',
                 ],
                 'aggs'   => [
                     'properties' => [
                         'terms' => [
-                            'field' => 'properties.name',
+                            'field' => 'search_properties.name',
                         ],
                         'aggs'  => [
                             'value' => [
                                 'terms' => [
-                                    'field' => 'properties.value',
+                                    'field' => 'search_properties.value',
                                 ],
                             ],
                         ],

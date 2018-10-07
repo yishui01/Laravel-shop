@@ -22,7 +22,6 @@ class CreateCrowdfundingProductsTable extends Migration
             $table->unsignedInteger('user_count')->default(0)->comment('当前参与众筹用户数');
             $table->dateTime('end_at')->comment('众筹结束时间');
             $table->string('status')->default(\App\Models\CrowdfundingProduct::STATUS_FUNDING)->comment('当前筹款状态');
-            $table->unsignedInteger('quantity')->comment('众筹总份数，卖完即止');
             $table->timestamps();
         });
     }

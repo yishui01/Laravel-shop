@@ -107,6 +107,9 @@ body {
           }
         }
       }
+      .product-content:hover{
+       box-shadow:0 0 5px rgba(167, 167, 167, .5);
+      }
     }
   }
 }
@@ -160,9 +163,12 @@ body {
   .filters {
     font-size: 12px;
     margin-bottom: 10px;
+
     &>.row {
+      display: -webkit-box;
       border-bottom: 1px solid #eee;
       .filter-key {
+        vertical-align: center;
         width: 150px;
         padding-top: 5px;
         padding-bottom: 5px;

@@ -229,10 +229,10 @@
                 text:"OK",
                 type:"success",
                 showCancelButton:true,
-                    confirmButtonText:"继续添加",
+                confirmButtonText:"继续添加",
                 cancelButtonText:"返回列表",
                 closeOnConfirm:false,
-                    closeOnCancel:false,
+                closeOnCancel:false,
             },function(isConfirm){
                     if (isConfirm) {
                         location.href = '/admin/skus/create';
