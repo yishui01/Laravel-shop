@@ -60,7 +60,7 @@
 - 9、在elasticSearch的config目录下新建 analysis/synonyms.txt，不用写内容都行，这个文件主要用于同义词搜索，没有不行（最终路径看起来像这样 /usr/local/src/elasticsearch-6.3.0/config/analysis）
 - 10、linux: 新建一个用户，切换到该用户，启动ES。windows直接执行bin下的bat脚本即可                           
 - 11、启动mysql，创建数据库，配置env数据库，运行php artisan migrate:fresh
-- 12、后台管理员账号为admin 密码为admin
+- 12、后台管理员账号为admin 密码为admin  前台用户账号为123456@qq.com 密码为123456
 - 13、配置好队列和定时任务
 - 提示:APP_DEBUG为true时，注册时的短信验证码不会发送，固定为1234
 

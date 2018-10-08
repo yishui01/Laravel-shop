@@ -477,6 +477,15 @@ class SeedData extends Migration
 
         //重建ES索引
         \Illuminate\Support\Facades\Artisan::call('es:migrate');
+        //创建测试用户
+        \App\Models\User::create([
+            'name'     => 'test',
+            'email'    => '123456@qq.com',
+            'password' => bcrypt(123456),
+            'email_verified'=>1,
+            'phone'   => 13123456789,
+            'avatar'  =>'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1468890659,201072083&fm=27&gp=0.jpg'
+        ]);
     }
 
 

@@ -95,7 +95,7 @@ class RegisterController extends Controller
     public function sendSms(Request $request, CaptchaService $captchaService, SmsService $smsService)
     {
         $this->validate($request, [
-            'phone' => 'required|string|between:11,11',
+            'phone' => 'required|string|between:11,11|regex:/^1[34578]\d{9}$/|unique:users',
             'ticket'  => 'required|string',
             'randstr' => 'required|string',
         ]);
