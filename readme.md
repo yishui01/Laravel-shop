@@ -1,6 +1,6 @@
 ## 电子商城
 本项目基于Laravel-china教程6《电商进阶》，在此基础上进行扩展开发
-<br /><br />线上demo：http://39.108.52.210
+<br /><br />线上demo：https://shop.wuxxin.com
 ## 扩展内容
 1、用户模块
 - 支持手机号注册、登录、找回密码（腾讯云验证码和短信发送）
@@ -50,7 +50,7 @@
 
 ## 安装方法
 - 1、git clone或者下载解压到本地
-- 2、将public设置为网站根目录，调整storage目录权限，在public目录下手动创建uploads文件夹
+- 2、将public设置为网站根目录，调整storage目录权限，在public目录下手动创建uploads文件夹并分配给服务器权限
 - 3、composer install
 - 4、npm install
 - 5、npm run production
@@ -62,5 +62,5 @@
 - 11、启动mysql，创建数据库，配置env数据库，运行php artisan migrate:fresh
 - 12、后台管理员账号为admin 密码为admin  前台用户账号为123456@qq.com 密码为123456
 - 13、配置好队列和定时任务，
-- 提示:APP_DEBUG为true时，注册时的短信验证码不会发送，固定为1234，APP_ENV为local时，支付回调使用NGROK_URL配置的网址
+- 提示:APP_DEBUG为true时，注册时的短信验证码不会发送，固定为1234，APP_ENV为local时，支付回调使用NGROK_URL配置的网址，证书目录需要自己手动在resources下新建wechat_pay目录，把微信证书丢里面
 
