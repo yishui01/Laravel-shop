@@ -60,7 +60,7 @@ class ProductSearchBuilder
                         'description',
                         'skus_title',
                         'skus_description',
-                        'properties_value',
+                     //   'properties_value',
                     ],
                 ],
             ];
