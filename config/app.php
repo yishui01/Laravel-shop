@@ -20,8 +20,8 @@ return [
     ],
     'min_installment_amount' => 300,  // 最低分期金额
     'installment_fine_rate'  => 0.05, // 逾期日息 0.05%
-    'seckill_order_ttl'      => 600,  //秒杀订单支付时间，600秒（10分钟）
-
+    'seckill_order_ttl'      => env('seckill_order_ttl',600),  //秒杀订单支付时间，600秒（10分钟）
+    'order_ttl'              =>env('order_ttl',1800), //普通/众筹 订单支付时间，1800秒(30分钟)
     'name' => env('APP_NAME', 'Laravel'),
 
     /*

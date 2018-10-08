@@ -467,7 +467,7 @@ class SeedData extends Migration
                 \App\Models\ProductSku::create([
                     'title' =>$v['attr_val'],
                     'description' =>'',
-                    'price' =>random_int(3000,3999),
+                    'price' =>number_format(lcg_value(), 2),
                     'stock' =>random_int(100,500),
                     'product_id' =>$product->id,
                     'attributes' =>$v['id'],

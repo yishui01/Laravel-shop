@@ -61,6 +61,6 @@
 - 10、linux: 新建一个用户，切换到该用户，启动ES。windows直接执行bin下的bat脚本即可                           
 - 11、启动mysql，创建数据库，配置env数据库，运行php artisan migrate:fresh
 - 12、后台管理员账号为admin 密码为admin  前台用户账号为123456@qq.com 密码为123456
-- 13、配置好队列和定时任务
-- 提示:APP_DEBUG为true时，注册时的短信验证码不会发送，固定为1234
+- 13、配置好队列和定时任务，
+- 提示:APP_DEBUG为true时，注册时的短信验证码不会发送，固定为1234，APP_ENV为local时，支付回调使用NGROK_URL配置的网址
 
