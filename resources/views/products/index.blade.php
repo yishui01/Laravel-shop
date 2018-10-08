@@ -95,15 +95,15 @@
                                                 <img src="{{ $product->full_image }}" alt="">
                                             </a>
                                         </div>
-                                        <div class="price" style="display: inline-block"><b>￥</b>{{ $product->price }}</div>
+                                    <div class="price" style="display: inline-block"><b>￥</b>{{ $product->price }}</div>
                                         @if($product->type == \App\Models\Product::TYPE_SECKILL)
                                             @if(!$product->seckill->is_before_start && !$product->seckill->is_after_end)
-                                            <div  style="display: inline-block;margin-left: 50px;border-radius:10%;border: 1px solid red;color:red;padding:0 8px;">秒杀中</div>
+                                            <div  style="display: inline-block;margin-top:10px;margin-right: 20px;float:right;border-radius:10%;border: 1px solid red;color:red;padding:0 8px;">秒杀中</div>
                                             @else
-                                            <div  style="display: inline-block;margin-left: 50px;border-radius:10%;border: 1px solid black;color:black;padding:0 8px;">秒杀</div>
+                                            <div  style="display: inline-block;margin-top:10px;margin-right: 20px;float:right;border-radius:10%;border: 1px solid black;color:black;padding:0 8px;">秒杀</div>
                                             @endif
                                         @elseif($product->type == \App\Models\Product::TYPE_CROWDFUNDING)
-                                        <div  style="display: inline-block;margin-left: 50px;border-radius:10%;border: 1px solid #2ab27b;color:#2ab27b;padding:0 8px;">众筹</div>
+                                        <div  style="display: inline-block;margin-top:10px;margin-right: 20px;float:right;border-radius:10%;border: 1px solid #2ab27b;color:#2ab27b;padding:0 8px;">众筹</div>
                                         @endif
                                             <div class="title">
                                             <a href="{{ route('products.show', ['product' => $product->id]) }}">{{ $product->title }}</a>
