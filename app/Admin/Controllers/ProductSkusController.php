@@ -114,6 +114,11 @@ class ProductSkusController extends Controller
             $grid->description('描述');
 
             $grid->updated_at('修改时间')->sortable();
+
+            $grid->filter(function ($filter){
+                $filter->like('product.title', '所属商品');
+                $filter->like('title', '商品属性');
+            });
         });
     }
 

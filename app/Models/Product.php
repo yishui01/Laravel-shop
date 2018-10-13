@@ -173,6 +173,30 @@ class Product extends Model
         return $property_arr;
     }
 
+    //设置秒杀商品到redis中
+    public function setSeckillToRedis()
+    {
+        //设置秒杀商品
+        $this->load(['seckill']);
+        // 获取当前时间与秒杀结束时间的差值
+        $diff = $this->seckill->end_at->getTimestamp() - time();
+        // 遍历商品 SKU
+        $this->skus->each(function (ProductSku $sku) use ($diff) {
+            $stock_key = 'seckill_sku_'.$sku->id;
+            $sku_time_key = 'seckill_sku_'.$sku->id.'_time';
+            // 如果秒杀商品是上架并且尚未到结束时间
+            if ($this->on_sale && $diff > 0) {
+                // 将剩余库存写入到 Redis 中，并设置该值过期时间为秒杀截止时间
+                \Redis::setex($stock_key, $diff, $sku->stock);
+                \Redis::setex($sku_time_key, $diff, $this->seckill->start_at->timestamp.'#'.$this->seckill->end_at->timestamp);
+            } else {
+                // 否则将该 SKU 的库存值从 Redis 中删除
+                \Redis::del($stock_key);
+                \Redis::del($sku_time_key);
+            }
+        });
+    }
+
     public function scopeByIds($query, $ids)
     {
         return $query->whereIn('id', $ids)->orderByRaw(sprintf("FIND_IN_SET(id, '%s')", join(',', $ids)));

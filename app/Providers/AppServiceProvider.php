@@ -5,9 +5,11 @@ namespace App\Providers;
 use App\Exceptions\InvalidRequestException;
 use App\Http\ViewComposers\CategoryTreeComposer;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\ProductSku;
 use App\Models\User;
 use App\Observer\CategoryObserver;
+use App\Observer\ProductObserver;
 use App\Observer\ProductSkuObserver;
 use App\Observer\UserObserver;
 use Carbon\Carbon;
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         Carbon::setLocale('zh');
 
         ProductSku::observe(ProductSkuObserver::class);
+        Product::observe(ProductObserver::class);
         User::observe(UserObserver::class);
         Category::observe(CategoryObserver::class);
         // 当 Laravel 渲染 products.index 和 products.show 模板时，就会使用 CategoryTreeComposer 这个来注入类目树变量
