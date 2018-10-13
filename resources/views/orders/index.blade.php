@@ -57,7 +57,7 @@
                                                                 已关闭
                                                             @else
                                                                 未支付<br>
-                                                                请于 {{ $order->type=\App\Models\Order::TYPE_SECKILL ? $order->created_at->addSecond(config('app.seckill_order_ttl'))->format('Y-m-d H:i') : $order->created_at->addSecond(config('myconfig.order.order_ttl'))->format('Y-m-d H:i') }} 前完成支付<br>
+                                                                请于 {{ $order->type == \App\Models\Order::TYPE_SECKILL ? $order->created_at->addSecond(config('app.seckill_order_ttl'))->format('Y-m-d H:i') : $order->created_at->addSecond(config('app.order_ttl'))->format('Y-m-d H:i') }}前完成支付<br>
                                                                 否则订单将自动关闭
                                                             @endif
                                                         </td>
