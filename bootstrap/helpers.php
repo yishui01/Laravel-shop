@@ -1,5 +1,6 @@
 <?php
 
+//返回公网地址（主要用于支付回调）
 function ngrok_url($routeName, $parameters = [])
 {
     // 开发环境，并且配置了 NGROK_URL
@@ -10,6 +11,22 @@ function ngrok_url($routeName, $parameters = [])
 
     return route($routeName, $parameters);
 }
+
+//补全文件地址
+function file_url($val = '') {
+    // 如果 image 字段本身就已经是完整的 url 就直接返回
+    if (strpos($val, 'http') !== false) {
+        return $val;
+    }
+    //使用了腾讯云COS，补全URL
+    if (env('FILE_STORE') == 'cosv5') {
+        return env('COS_DOMAIN').'/'.$val;
+    }
+    //本地存储，补全URL
+    return \Storage::disk(env('FILE_STORE', 'public'))->url($val);
+}
+
+
 
 function route_class()
 {

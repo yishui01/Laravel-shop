@@ -15,9 +15,6 @@ class Banner extends Model
 
     public function getUrlAttribute($value)
     {
-        if (strpos($value, 'http') === false) {
-            return env('APP_URL').'/uploads/'.$value;
-        }
-        return $value;
+        return file_url($value);
     }
 }

@@ -68,7 +68,7 @@ return [
      */
     'upload' => [
         // 对应 filesystem.php 中的 disks
-        'disk' => 'public',
+        'disk' => env('FILE_STORE', 'public'),
 
         'directory' => [
             'image' => 'images',

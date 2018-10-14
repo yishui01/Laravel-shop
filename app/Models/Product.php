@@ -67,11 +67,7 @@ class Product extends Model
     //补全商品图片url
     public function getFullImageAttribute()
     {
-        // 如果 image 字段本身就已经是完整的 url 就直接返回
-        if (strpos($this->attributes['image'], 'http') !== false) {
-            return $this->attributes['image'];
-        }
-        return \Storage::disk('public')->url($this->attributes['image']);
+        return file_url($this->attributes['image']);
     }
 
     //获取这个商品下的属性以及属性值（可选属性可唯一属性都找出来）
@@ -79,7 +75,6 @@ class Product extends Model
     {
         //所有的属性（包括可选和唯一）
         ProductAttribute::where('product_id', $this->attributes['id'])->get();
-
     }
 
     //获取商品详情页面的SKU以及可选属性和唯一属性

@@ -185,7 +185,8 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
+        //腾讯云OSS
+        Freyo\Flysystem\QcloudCOSv5\ServiceProvider::class,
     ],
 
     /*

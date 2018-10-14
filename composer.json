@@ -13,6 +13,7 @@
         "encore/laravel-admin": "1.5.*",
         "endroid/qr-code": "^2.5",
         "fideloper/proxy": "~3.3",
+        "freyo/flysystem-qcloud-cos-v5": "1.1.7.1",
         "laravel/framework": "5.5.*",
         "laravel/tinker": "~1.0",
         "liyu/dingo-serializer-switch": "^0.3.0",
@@ -20,9 +21,11 @@
         "overtrue/laravel-lang": "^3.0",
         "overtrue/laravel-wechat": "~4.0",
         "predis/predis": "^1.1",
+        "qcloud/cos-sdk-v5": ">=1.0",
         "socialiteproviders/weixin": "^4.0",
         "tymon/jwt-auth": "1.0.0-rc.2",
-        "yansongda/pay": "^2.4"
+        "yansongda/pay": "^2.4",
+        "zgldh/qiniu-laravel-storage": "^0.10.0"
     },
     "require-dev": {
         "filp/whoops": "~2.0",

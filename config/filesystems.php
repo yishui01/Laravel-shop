@@ -63,6 +63,22 @@ return [
             'bucket' => env('AWS_BUCKET'),
         ],
 
+        //腾讯云OSS
+        'cosv5' => [
+            'driver' => 'cosv5',
+            'region'          => env('COS_REGION', 'ap-guangzhou'),
+            'credentials'     => [
+                'appId'     => env('COS_APP_ID'),
+                'secretId'  => env('COS_KEY'),
+                'secretKey' => env('COS_SECRET'),
+            ],
+            'timeout'         => env('COS_TIMEOUT', 60),
+            'connect_timeout' => env('COS_CONNECT_TIMEOUT', 60),
+            'bucket'          => env('COS_BUCKET'),
+            'cdn'             => env('COS_CDN'),
+            'scheme'          => env('COS_SCHEME', 'https'),
+        ]
+
     ],
 
 ];
