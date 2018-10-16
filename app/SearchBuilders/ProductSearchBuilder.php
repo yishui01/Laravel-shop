@@ -81,17 +81,21 @@ class ProductSearchBuilder
                     'properties' => [
                         'terms' => [
                             'field' => 'search_properties.name',
+                            "size"=>1000  //这个size的意思是只能最多显示多少条聚合记录，这里聚合的是属性名称，最多显示1000条属性名称
                         ],
                         'aggs'  => [
                             'value' => [
                                 'terms' => [
                                     'field' => 'search_properties.value',
+                                    "size"=>1000 //这个size的意思是只能最多显示多少条聚合记录，这里聚合的是属性值，最多显示1000条属性值
                                 ],
                             ],
                         ],
                     ],
                 ],
+
             ],
+
         ];
 
         return $this;

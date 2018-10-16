@@ -69,7 +69,7 @@ class ProductsController extends Controller
         }
 
         $result = app('es')->search($builder->getParams());
-
+        //dd($result);
         $properties = [];
         // 如果返回结果里有 aggregations 字段，说明做了分面搜索
 
@@ -86,6 +86,7 @@ class ProductsController extends Controller
                     // 过滤掉只剩下一个值 或者 已经在筛选条件里的属性
                     return count($property['values']) > 1 && !isset($propertyFilters[$property['key']]) ;
                 });
+
         }
 
         // 通过 collect 函数将返回结果转为集合，并通过集合的 pluck 方法取到返回的商品 ID 数组
