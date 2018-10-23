@@ -82,9 +82,7 @@ Route::group(['middleware' => ['my_auth']], function() {
     Route::post('orders/{order}/review', 'OrdersController@sendReview')->name('orders.review.store');
     //申请退款
     Route::post('orders/{order}/apply_refund', 'OrdersController@applyRefund')->name('orders.apply_refund');
-    //微信退款通知回调
-    Route::post('payment/wechat/refund_notify', 'PaymentController@wechatRefundNotify')->name('payment.wechat.refund_notify');
-    //优惠券查询
+   //优惠券查询
     Route::get('coupon_codes/{code}', 'CouponCodesController@show')->name('coupon_codes.show');
     //众筹商品下单
     Route::post('crowdfunding_orders', 'OrdersController@crowdfunding')->name('crowdfunding_orders.store');
@@ -113,6 +111,9 @@ Route::post('payment/alipay/notify', 'PaymentController@alipayNotify')->name('pa
 Route::get('payment/alipay/return', 'PaymentController@alipayReturn')->name('payment.alipay.return');
 //微信扫码支付回调
 Route::post('payment/wechat/notify', 'PaymentController@wechatNotify')->name('payment.wechat.notify');
+//微信退款通知回调
+Route::post('payment/wechat/refund_notify', 'PaymentController@wechatRefundNotify')->name('payment.wechat.refund_notify');
+
 
 // 分期付款支付宝后端回调
 Route::post('installments/alipay/notify', 'InstallmentsController@alipayNotify')->name('installments.alipay.notify');
